@@ -62,7 +62,7 @@
             this.gb_Startup.Size = new System.Drawing.Size(560, 112);
             this.gb_Startup.TabIndex = 0;
             this.gb_Startup.TabStop = false;
-            this.gb_Startup.Text = "开始";
+            this.gb_Startup.Text = "Start";
             // 
             // label4
             // 
@@ -70,7 +70,7 @@
             this.label4.Name = "label4";
             this.label4.Size = new System.Drawing.Size(86, 20);
             this.label4.TabIndex = 4;
-            this.label4.Text = "命名空间：";
+            this.label4.Text = "Namespace: ";
             this.label4.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
             // 
             // tb_Namespace
@@ -86,7 +86,7 @@
             this.b_Close.Name = "b_Close";
             this.b_Close.Size = new System.Drawing.Size(45, 87);
             this.b_Close.TabIndex = 2;
-            this.b_Close.Text = "退出";
+            this.b_Close.Text = "Exit";
             this.b_Close.UseVisualStyleBackColor = true;
             // 
             // b_Go
@@ -95,7 +95,7 @@
             this.b_Go.Name = "b_Go";
             this.b_Go.Size = new System.Drawing.Size(156, 87);
             this.b_Go.TabIndex = 2;
-            this.b_Go.Text = "执行";
+            this.b_Go.Text = "Go";
             this.b_Go.UseVisualStyleBackColor = true;
             // 
             // label1
@@ -104,7 +104,7 @@
             this.label1.Name = "label1";
             this.label1.Size = new System.Drawing.Size(87, 20);
             this.label1.TabIndex = 1;
-            this.label1.Text = "数据库：";
+            this.label1.Text = "Database: ";
             this.label1.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
             // 
             // label3
@@ -113,7 +113,7 @@
             this.label3.Name = "label3";
             this.label3.Size = new System.Drawing.Size(86, 20);
             this.label3.TabIndex = 1;
-            this.label3.Text = "选择操作：";
+            this.label3.Text = "Action: ";
             this.label3.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
             // 
             // label2
@@ -122,7 +122,7 @@
             this.label2.Name = "label2";
             this.label2.Size = new System.Drawing.Size(86, 20);
             this.label2.TabIndex = 1;
-            this.label2.Text = "选择工作类：";
+            this.label2.Text = "Worker:";
             this.label2.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
             // 
             // cb_Operations
@@ -160,7 +160,7 @@
             this.gb_Console.Size = new System.Drawing.Size(560, 317);
             this.gb_Console.TabIndex = 1;
             this.gb_Console.TabStop = false;
-            this.gb_Console.Text = "调试信息";
+            this.gb_Console.Text = "Debug Info";
             // 
             // l_Console
             // 
@@ -181,7 +181,7 @@
             this.MaximizeBox = false;
             this.Name = "frmMain";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
-            this.Text = "Coder - Operation Panel";
+            this.Text = "POCO - Class Generator";
             this.gb_Startup.ResumeLayout(false);
             this.gb_Startup.PerformLayout();
             this.gb_Console.ResumeLayout(false);

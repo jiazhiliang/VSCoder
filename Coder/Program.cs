@@ -29,13 +29,11 @@ namespace ISoft.Coder
         /// <summary>
         /// Factory run (async)
         /// </summary>
-        public static void Go(DTE2 app)
+        public static async void Go(DTE2 app)
         {
-            //DbConfiguration.SetConfiguration(new MySqlEFConfiguration());
             if (_MainForm != null) _MainForm.Close();
             _MainForm = new Forms.frmMain(app);
-
-            Task.Run(() =>
+            await Task.Run(() =>
             {
                 _MainForm.ShowDialog();
             });
@@ -51,13 +49,6 @@ namespace ISoft.Coder
                 map.ExeConfigFilename = @"c:\t.config";
                 _Configuration = CF.ConfigurationManager.OpenMappedExeConfiguration(map, CF.ConfigurationUserLevel.None);
                 return _Configuration;
-
-                //var map = new CF.ExeConfigurationFileMap();
-                //var assembly = Assembly.GetExecutingAssembly();
-                //var uri = new Uri(Path.GetDirectoryName(assembly.CodeBase));
-                //map.ExeConfigFilename = Path.Combine(uri.LocalPath, assembly.GetName().Name + ".dll.config");
-                //_Configuration = CF.ConfigurationManager.OpenMappedExeConfiguration(map, CF.ConfigurationUserLevel.None);
-                //return _Configuration;
             }
         }
 

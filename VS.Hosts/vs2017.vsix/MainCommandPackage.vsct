@@ -56,7 +56,7 @@
         <Parent guid="guidMainCommandPackageCmdSet" id="MyMenuGroup" />
         <Icon guid="guidImages" id="icon" />
         <Strings>
-          <ButtonText>Code Generate ..</ButtonText>
+          <ButtonText>Generate POCO Class ..</ButtonText>
         </Strings>
       </Button>
     </Buttons>

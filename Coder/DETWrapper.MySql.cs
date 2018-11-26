@@ -110,7 +110,7 @@ namespace ISoft.Coder
         {
             if (string.IsNullOrEmpty(_Namespace))
             {
-                MessageBox.Show("请填写命名空间");
+                MessageBox.Show("Please provide a namespace");
                 return;
             }
 
@@ -268,8 +268,6 @@ namespace ISoft.Coder
                         _Context.Tables.Where(_Filter).OrderBy(t => t.Name).ToList();
                  
                     // _App Configure
-
-
 
                     // Start typing
                     _BatchIndex = -1;
@@ -500,8 +498,8 @@ namespace ISoft.Coder
         {
             _Filter = tableFilter;
             _Identifier = "EF";
-            _Operations.Add("生成系列 cs 文件（EObject 类）");
-            _Operations.Add("重新生成 ____table 元数据");
+            _Operations.Add("Generate class files（POCO）");
+            _Operations.Add("Re-populate meta info ____table");
         }
 
     }
