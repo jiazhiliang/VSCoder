@@ -33,6 +33,11 @@ namespace ISoft.Coder
             }
         }
 
+        public string GetTemplatePath(string key)
+        {
+            return Host.Configuration.AppSettings.Settings[key].Value;
+        }
+
         /// <summary>
         /// Supprting operations 
         /// </summary>

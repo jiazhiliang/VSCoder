@@ -1,22 +1,8 @@
-﻿using System;
-using System.IO;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Windows.Forms;
-using Extensibility;
-using EnvDTE;
-using EnvDTE80;
-using Microsoft.VisualStudio.CommandBars;
-using System.Resources;
-using System.Reflection;
-using System.Globalization;
+﻿using EnvDTE80;
 
-using System.Data.Entity;
-using CF = System.Configuration;
-using FM = System.Windows.Forms;
-using System.Data.SqlClient;
 using System.Threading.Tasks;
+
+using CF = System.Configuration;
 namespace ISoft.Coder
 {
     /// <summary>
@@ -37,7 +23,7 @@ namespace ISoft.Coder
             {
                 _MainForm.ShowDialog();
             });
-            
+
         }
 
         private static CF.Configuration _Configuration = null;
@@ -46,7 +32,7 @@ namespace ISoft.Coder
             get
             {
                 var map = new CF.ExeConfigurationFileMap();
-                map.ExeConfigFilename = @"c:\t.config";
+                map.ExeConfigFilename = @"d:\t.config";
                 _Configuration = CF.ConfigurationManager.OpenMappedExeConfiguration(map, CF.ConfigurationUserLevel.None);
                 return _Configuration;
             }

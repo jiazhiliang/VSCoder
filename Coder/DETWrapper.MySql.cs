@@ -212,12 +212,6 @@ namespace ISoft.Coder
                 return string.Empty;
             };
 
-            Func<ProjectItem, int, ProjectItem> _newBatch = (folder, index) =>
-            {
-                return folder.ProjectItems.AddFromTemplate(
-                    TemplateFile, string.Format("{0}.{1}.cs", _Identifier, index.ToString("D2")));
-            };
-
             var now = DateTime.Now;
             var projects = (Array)_App.ActiveSolutionProjects;
             if (projects.Length > 0)

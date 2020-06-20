@@ -120,6 +120,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="DETWrapper.MySql.cs" />
+    <Compile Include="DETWrapper.SqlServer.Ex.cs" />
     <Compile Include="Forms\frmMain.cs">
       <SubType>Form</SubType>
     </Compile>

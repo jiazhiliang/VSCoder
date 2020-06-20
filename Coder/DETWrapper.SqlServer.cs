@@ -16,7 +16,7 @@ namespace ISoft.Coder
     /// <summary>
     /// Wrapper class for SqlServer
     /// </summary>
-    public class SqlServerClassGenWrapper : BaseDTEWrapper
+    public partial class SqlServerClassGenWrapper : BaseDTEWrapper
     {
         private const string FIELD_SUMMARY = "Caption";
         private SqlServerEFContext _Context;
@@ -97,113 +97,122 @@ namespace ISoft.Coder
                 case 1:
                     _Do_1(doneToConfirmContinue);
                     break;
-                default:
-
+                case 2:
+                    _Do_2(doneToConfirmContinue);
+                    break;
+                case 3:
+                    _Do_3(doneToConfirmContinue);
+                    break;
+                case 4:
+                    _Do_4(doneToConfirmContinue);
                     break;
             }
         }
 
         private void _Do_0(Func<string, bool> doneToConfirmContinue = null)
         {
+            if (_Context != null)
+            {
+                _Context.Rebuild(
+                    tableExcludeContains: new string[] { "__MigrationHistory" },
+                    doneToConfirmContinue: doneToConfirmContinue);
+            }
+        }
+
+        private string _getType(MBColumn c)
+        {
+            switch (c.Type)
+            {
+                case _Types.t_bit:
+                case _Types.t_boolean:
+                    return (c.Nullable) ? "Nullable<bool>" : "bool";
+                case _Types.t_tinyint:
+                    return (c.Nullable) ? "Nullable<byte>" : "byte";
+                case _Types.t_smallint:
+                    return (c.Nullable) ? "Nullable<short>" : "short";
+                case _Types.t_year:
+                    return (c.Nullable) ? "Nullable<short>" : "short";
+                case _Types.t_int:
+                    return (c.Nullable) ? "Nullable<int>" : "int";
+                case _Types.t_integer:
+                    return (c.Nullable) ? "Nullable<int>" : "int";
+                case _Types.t_mediumint:
+                    return (c.Nullable) ? "Nullable<int>" : "int";
+                case _Types.t_bigint:
+                    return (c.Nullable) ? "Nullable<long>" : "long";
+                case _Types.t_float:
+                    return (c.Nullable) ? "Nullable<double>" : "double";
+                case _Types.t_double:
+                case _Types.t_real:
+                    return (c.Nullable) ? "Nullable<float>" : "float";
+                case _Types.t_rowversion:
+                    return "byte[]";
+                case _Types.t_numeric:
+                case _Types.t_decimal:
+                case _Types.t_dec:
+                case _Types.t_fixed:
+                case _Types.t_serial:
+                    return (c.Nullable) ? "Nullable<decimal>" : "decimal";
+                case _Types.t_date:
+                case _Types.t_datetime:
+                case _Types.t_datetime2:
+                    return (c.Nullable) ? "Nullable<DateTime>" : "DateTime";
+                case _Types.t_timestamp:
+                    if (_Context.IsMySql) return (c.Nullable) ? "Nullable<DateTime>" : "DateTime";
+                    return "byte[]";
+                case _Types.t_datetimeoffset:
+                    return (c.Nullable) ? "Nullable<System.DateTimeOffset>" : "System.DateTimeOffset";
+                case _Types.t_time:
+                    return (c.Nullable) ? "Nullable<System.TimeSpan>" : "System.TimeSpan";
+
+                case _Types.t_smalldatetime:
+                    return (c.Nullable) ? "Nullable<DateTime>" : "DateTime";
+                case _Types.t_image:
+                    return "byte[]";
+                case _Types.t_money:
+                case _Types.t_smallmoney:
+                    return (c.Nullable) ? "Nullable<decimal>" : "decimal";
+                case _Types.t_uniqueidentifier:
+                    return (c.Nullable) ? "Nullable<Guid>" : "Guid";
+                case _Types.t_char:
+                    return "string";
+                case _Types.t_varchar:
+                case _Types.t_tinytext:
+                case _Types.t_text:
+                case _Types.t_mediumtext:
+                case _Types.t_longtext:
+                case _Types.t_set:
+                case _Types.t_enum:
+                case _Types.t_nchar:
+                case _Types.t_nvarchar:
+                case _Types.t_ntext:
+                case _Types.t_xml:
+                    return "string";
+                case _Types.t_binary:
+                case _Types.t_varbinary:
+                case _Types.t_tinyblob:
+                case _Types.t_blob:
+                case _Types.t_mediumblob:
+                case _Types.t_longblob:
+                    return "byte[]";
+                case _Types.t_spatial_geometry:
+                    return (c.Nullable) ? "Nullable<System.Data.Spatial.DbGeometry>" : "System.Data.Spatial.DbGeometry";
+                case _Types.t_spatial_geography:
+                    return (c.Nullable) ? "Nullable<System.Data.Spatial.DbGeography>" : "System.Data.Spatial.DbGeography";
+                case _Types.t_sql_variant:
+                    return "object";
+            }
+
+            return string.Empty;
+        }
+
+        private void _Do_1(Func<string, bool> doneToConfirmContinue = null)
+        {
             if (string.IsNullOrEmpty(_Namespace))
             {
                 MessageBox.Show("Please provide a namespace");
                 return;
             }
-
-            Func<MBColumn, string> _getType = c =>
-            {
-                switch (c.Type)
-                {
-                    case _Types.t_bit:
-                    case _Types.t_boolean:
-                        return (c.Nullable) ? "Nullable<bool>" : "bool";
-
-                    case _Types.t_tinyint:
-                        return (c.Nullable) ? "Nullable<byte>" : "byte";
-                    case _Types.t_smallint:
-                        return (c.Nullable) ? "Nullable<short>" : "short";
-                    case _Types.t_year:
-                        return (c.Nullable) ? "Nullable<short>" : "short";
-                    case _Types.t_int:
-                        return (c.Nullable) ? "Nullable<int>" : "int";
-                    case _Types.t_integer:
-                        return (c.Nullable) ? "Nullable<int>" : "int";
-                    case _Types.t_mediumint:
-                        return (c.Nullable) ? "Nullable<int>" : "int";
-                    case _Types.t_bigint:
-                        return (c.Nullable) ? "Nullable<long>" : "long";
-                    case _Types.t_float:
-                        return (c.Nullable) ? "Nullable<double>" : "double";
-                    case _Types.t_double:
-                    case _Types.t_real:
-                        return (c.Nullable) ? "Nullable<float>" : "float";
-                    case _Types.t_rowversion:
-                        return "byte[]";
-                    case _Types.t_numeric:
-                    case _Types.t_decimal:
-                    case _Types.t_dec:
-                    case _Types.t_fixed:
-                    case _Types.t_serial:
-                        return (c.Nullable) ? "Nullable<decimal>" : "decimal";
-                    case _Types.t_date:
-                    case _Types.t_datetime:
-                    case _Types.t_datetime2:
-                        return (c.Nullable) ? "Nullable<DateTime>" : "DateTime";
-                    case _Types.t_timestamp:
-                        if (_Context.IsMySql) return (c.Nullable) ? "Nullable<DateTime>" : "DateTime";
-                        return "byte[]";
-                    case _Types.t_datetimeoffset:
-                        return (c.Nullable) ? "Nullable<System.DateTimeOffset>" : "System.DateTimeOffset";
-                    case _Types.t_time:
-                        return (c.Nullable) ? "Nullable<System.TimeSpan>" : "System.TimeSpan";
-
-                    case _Types.t_smalldatetime:
-                        return (c.Nullable) ? "Nullable<DateTime>" : "DateTime";
-                    case _Types.t_image:
-                        return "byte[]";
-                    case _Types.t_money:
-                    case _Types.t_smallmoney:
-                        return (c.Nullable) ? "Nullable<decimal>" : "decimal";
-                    case _Types.t_uniqueidentifier:
-                        return (c.Nullable) ? "Nullable<Guid>" : "Guid";
-                    case _Types.t_char:
-                        return "string";
-                    case _Types.t_varchar:
-                    case _Types.t_tinytext:
-                    case _Types.t_text:
-                    case _Types.t_mediumtext:
-                    case _Types.t_longtext:
-                    case _Types.t_set:
-                    case _Types.t_enum:
-                    case _Types.t_nchar:
-                    case _Types.t_nvarchar:
-                    case _Types.t_ntext:
-                    case _Types.t_xml:
-                        return "string";
-                    case _Types.t_binary:
-                    case _Types.t_varbinary:
-                    case _Types.t_tinyblob:
-                    case _Types.t_blob:
-                    case _Types.t_mediumblob:
-                    case _Types.t_longblob:
-                        return "byte[]";
-                    case _Types.t_spatial_geometry:
-                        return (c.Nullable) ? "Nullable<System.Data.Spatial.DbGeometry>" : "System.Data.Spatial.DbGeometry";
-                    case _Types.t_spatial_geography:
-                        return (c.Nullable) ? "Nullable<System.Data.Spatial.DbGeography>" : "System.Data.Spatial.DbGeography";
-                    case _Types.t_sql_variant:
-                        return "object";
-                }
-
-                return string.Empty;
-            };
-
-            Func<ProjectItem, int, ProjectItem> _newBatch = (folder, index) =>
-            {
-                return folder.ProjectItems.AddFromTemplate(
-                    TemplateFile, string.Format("{0}.{1}.cs", _Identifier, index.ToString("D2")));
-            };
 
             var now = DateTime.Now;
             var projects = (Array)_App.ActiveSolutionProjects;
@@ -424,16 +433,6 @@ namespace ISoft.Coder
             }
         }
 
-        private void _Do_1(Func<string, bool> doneToConfirmContinue = null)
-        {
-            if (_Context != null)
-            {
-                _Context.Rebuild(
-                    tableExcludeContains: new string[] { "__MigrationHistory" },
-                    doneToConfirmContinue: doneToConfirmContinue);
-            }
-        }
-
         public SqlServerClassGenWrapper(
             SqlServerEFContext context, DTE2 app, string ns, Expression<Func<MBTable, bool>> tableFilter = null,
             int batchSize = 50)
@@ -448,8 +447,11 @@ namespace ISoft.Coder
         {
             _Filter = tableFilter;
             _Identifier = "EF";
-            _Operations.Add("Generate class files（POCO）");
             _Operations.Add("Re-populate meta info ____table");
+            _Operations.Add("Generate class files（POCO）");
+            _Operations.Add("ABP: generate entity class");
+            _Operations.Add("ABP: generate DTO");
+            _Operations.Add("ABP: generate EF table spec");
         }
 
     }
