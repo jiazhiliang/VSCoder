@@ -1,22 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Linq.Expressions;
-using System.Text;
-using System.Data.Linq;
-using System.Data.Linq.Mapping;
-using System.Windows.Forms;
-using Extensibility;
-using EnvDTE;
-using EnvDTE80;
-using Microsoft.VisualStudio.CommandBars;
-using System.Resources;
-using System.Reflection;
-using System.Globalization;
-using System.IO;
+﻿using EnvDTE;
 
-using LinqKit;
-using ISoft.Metabase;
+using EnvDTE80;
+
+using System;
+using System.Collections.Generic;
 namespace ISoft.Coder
 {
     /// <summary>
@@ -85,7 +72,7 @@ namespace ISoft.Coder
         /// Command implementation
         /// </summary>
         /// <param name="section"></param>
-        public void Do(int operation, 
+        public void Do(int operation,
             Func<string, bool> doneToConfirmContinue = null, Action<Exception> handleError = null)
         {
             try

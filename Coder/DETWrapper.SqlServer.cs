@@ -1,22 +1,16 @@
-﻿using System;
-using System.Data;
-using System.Data.Common;
+﻿using EnvDTE;
+
+using EnvDTE80;
+
+using ISoft.Metabase;
+
+using LinqKit;
+
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
-using System.Text;
 using System.Windows.Forms;
-using Extensibility;
-using EnvDTE;
-using EnvDTE80;
-using Microsoft.VisualStudio.CommandBars;
-using System.Resources;
-using System.Reflection;
-using System.Globalization;
-using System.IO;
-
-using LinqKit;
-using ISoft.Metabase;
 namespace ISoft.Coder
 {
     /// <summary>
@@ -60,7 +54,7 @@ namespace ISoft.Coder
             public const string t_time = "time";
             public const string t_smalldatetime = "smalldatetime";
             public const string t_timestamp = "timestamp";
-            
+
             public const string t_char = "char";
             public const string t_varchar = "varchar";
             public const string t_tinytext = "tinytext";
@@ -266,7 +260,7 @@ namespace ISoft.Coder
                             .AddFolder("___ENTITIES", Constants.vsProjectItemKindPhysicalFolder);
                     List<MBTable> tables =
                         _Context.Tables.Where(_Filter).OrderBy(t => t.Name).ToList();
-                 
+
                     // _App Configure
 
 
@@ -421,10 +415,10 @@ namespace ISoft.Coder
                             ts.Insert(string.Format(@"[Column(Order = {0})]", c.Ordinal));
                             ts.NewLine();
 
-                            if (c.CharMaxLength.HasValue && 
+                            if (c.CharMaxLength.HasValue &&
                                     !c.Type.Contains("blob") &&
                                     !c.Type.Contains("long") &&
-                                    !c.Type.Contains("text") 
+                                    !c.Type.Contains("text")
                                     //!c.Spec.Contains("char(36)") // guid
                                     )
                             {
