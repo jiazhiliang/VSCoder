@@ -91,8 +91,11 @@ namespace MainCommand
         private void Execute(object sender, EventArgs e)
         {
             ThreadHelper.ThrowIfNotOnUIThread();
-            var _applicationObject = ServiceProvider.GetServiceAsync(typeof(DTE)).Result as DTE2;
-            ISoft.Coder.Host.Go(_applicationObject);
+            _ = Task.Run(async () =>
+              {
+                  var _applicationObject = await ServiceProvider.GetServiceAsync(typeof(DTE)) as DTE2;
+                  ISoft.Coder.Host.Go(_applicationObject);
+              });
         }
     }
 }
