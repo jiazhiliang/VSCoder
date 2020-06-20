@@ -1,22 +1,16 @@
-﻿using System;
-using System.Data;
-using System.Data.Common;
+﻿using EnvDTE;
+
+using EnvDTE80;
+
+using ISoft.Metabase;
+
+using LinqKit;
+
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
-using System.Text;
 using System.Windows.Forms;
-using Extensibility;
-using EnvDTE;
-using EnvDTE80;
-using Microsoft.VisualStudio.CommandBars;
-using System.Resources;
-using System.Reflection;
-using System.Globalization;
-using System.IO;
-
-using LinqKit;
-using ISoft.Metabase;
 namespace ISoft.Coder
 {
     /// <summary>
@@ -60,7 +54,7 @@ namespace ISoft.Coder
             public const string t_time = "time";
             public const string t_smalldatetime = "smalldatetime";
             public const string t_timestamp = "timestamp";
-            
+
             public const string t_char = "char";
             public const string t_varchar = "varchar";
             public const string t_tinytext = "tinytext";
@@ -119,74 +113,46 @@ namespace ISoft.Coder
                 switch (c.Type)
                 {
                     case _Types.t_bit:
-#if MYSQL
                         if (c.Spec.Contains("(1)")) return (c.Nullable) ? "Nullable<bool>" : "bool";
                         return (c.Nullable) ? "Nullable<bool>" : "bool";
-#endif
                     case _Types.t_boolean:
                         return (c.Nullable) ? "Nullable<bool>" : "bool";
 
                     case _Types.t_tinyint:
-#if MYSQL
                         if (c.Spec.EndsWith("unsigned")) return (c.Nullable) ? "Nullable<byte>" : "byte";
                         return (c.Nullable) ? "Nullable<sbyte>" : "sbyte";
-#else
-                        return (c.Nullable) ? "Nullable<byte>" : "byte";
-#endif
                     case _Types.t_smallint:
-#if MYSQL
                         if (c.Spec.EndsWith("unsigned")) return (c.Nullable) ? "Nullable<int>" : "int";
-#endif
                         return (c.Nullable) ? "Nullable<short>" : "short";
                     case _Types.t_year:
                         return (c.Nullable) ? "Nullable<short>" : "short";
                     case _Types.t_int:
-#if MYSQL
                         if (c.Spec.EndsWith("unsigned")) return (c.Nullable) ? "Nullable<long>" : "long";
-#endif
                         return (c.Nullable) ? "Nullable<int>" : "int";
                     case _Types.t_integer:
-#if MYSQL
                         if (c.Spec.EndsWith("unsigned")) return (c.Nullable) ? "Nullable<long>" : "long";
-#endif
                         return (c.Nullable) ? "Nullable<int>" : "int";
                     case _Types.t_mediumint:
                         return (c.Nullable) ? "Nullable<int>" : "int";
                     case _Types.t_bigint:
-#if MYSQL
                         if (c.Spec.EndsWith("unsigned")) return (c.Nullable) ? "Nullable<decimal>" : "decimal";
-#endif
                         return (c.Nullable) ? "Nullable<long>" : "long";
                     case _Types.t_float:
-#if MYSQL
                         if (c.Spec.EndsWith("unsigned")) return (c.Nullable) ? "Nullable<decimal>" : "decimal";
                         return (c.Nullable) ? "Nullable<float>" : "float";
-#else
-                        return (c.Nullable) ? "Nullable<double>" : "double";
-#endif
                     case _Types.t_double:
-#if MYSQL
                         if (c.Spec.EndsWith("unsigned")) return (c.Nullable) ? "Nullable<decimal>" : "decimal";
                         return (c.Nullable) ? "Nullable<double>" : "double";
-#endif
                     case _Types.t_real:
-#if MYSQL
                         return (c.Nullable) ? "Nullable<double>" : "double";
-#else
-                        return (c.Nullable) ? "Nullable<float>" : "float";
-#endif
-
                     case _Types.t_rowversion:
-
                         return "byte[]";
-
                     case _Types.t_numeric:
                     case _Types.t_decimal:
                     case _Types.t_dec:
                     case _Types.t_fixed:
                     case _Types.t_serial:
                         return (c.Nullable) ? "Nullable<decimal>" : "decimal";
-
                     case _Types.t_date:
                     case _Types.t_datetime:
                     case _Types.t_datetime2:
@@ -210,13 +176,11 @@ namespace ISoft.Coder
                         return (c.Nullable) ? "Nullable<Guid>" : "Guid";
 
                     case _Types.t_char:
-#if MYSQL
                         if (_Context.IsMySql && c.Spec == "char(36)")
                         {
                             // char(36) 被认为是 MySql 的一个标志性实现
                             return (c.Nullable) ? "Nullable<Guid>" : "Guid";
                         }
-#endif
                         return "string";
                     case _Types.t_varchar:
                     case _Types.t_tinytext:
@@ -230,7 +194,6 @@ namespace ISoft.Coder
                     case _Types.t_ntext:
                     case _Types.t_xml:
                         return "string";
-
                     case _Types.t_binary:
                     case _Types.t_varbinary:
                     case _Types.t_tinyblob:
@@ -238,7 +201,6 @@ namespace ISoft.Coder
                     case _Types.t_mediumblob:
                     case _Types.t_longblob:
                         return "byte[]";
-
                     case _Types.t_spatial_geometry:
                         return (c.Nullable) ? "Nullable<System.Data.Spatial.DbGeometry>" : "System.Data.Spatial.DbGeometry";
                     case _Types.t_spatial_geography:
@@ -266,7 +228,7 @@ namespace ISoft.Coder
                             .AddFolder("___ENTITIES", Constants.vsProjectItemKindPhysicalFolder);
                     List<MBTable> tables =
                         _Context.Tables.Where(_Filter).OrderBy(t => t.Name).ToList();
-                 
+
                     // _App Configure
 
                     // Start typing
@@ -420,10 +382,10 @@ namespace ISoft.Coder
                             ts.Insert(string.Format(@"[Column(Order = {0})]", c.Ordinal));
                             ts.NewLine();
 
-                            if (c.CharMaxLength.HasValue && 
+                            if (c.CharMaxLength.HasValue &&
                                     !c.Type.Contains("blob") &&
                                     !c.Type.Contains("long") &&
-                                    !c.Type.Contains("text") 
+                                    !c.Type.Contains("text")
                                     //!c.Spec.Contains("char(36)") // guid
                                     )
                             {
