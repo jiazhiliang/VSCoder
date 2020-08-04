@@ -1,7 +1,5 @@
 ﻿using EnvDTE80;
 
-using System.Threading.Tasks;
-
 using CF = System.Configuration;
 namespace ISoft.Coder
 {
@@ -19,11 +17,7 @@ namespace ISoft.Coder
         {
             if (_MainForm != null) _MainForm.Close();
             _MainForm = new Forms.frmMain(app);
-            await Task.Run(() =>
-            {
-                _MainForm.ShowDialog();
-            });
-
+            _MainForm.ShowDialog();
         }
 
         private static CF.Configuration _Configuration = null;

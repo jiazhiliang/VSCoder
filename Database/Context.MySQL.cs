@@ -1,24 +1,14 @@
-﻿using System;
+﻿using MySql.Data.Entity;
+using System;
 using System.Collections;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text.RegularExpressions;
-using System.Linq.Expressions;
-using System.Text;
 using System.Data;
 using System.Data.Common;
-using System.Data.SqlClient;
 using System.Data.Entity;
+using System.Data.Entity.Core.Objects;
 using System.Data.Entity.Infrastructure;
 using System.Data.Entity.ModelConfiguration.Conventions;
-using System.Data.Entity.Core;
-using System.Data.Entity.Core.Objects;
-using System.Reflection;
-using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
-using LinqKit;
-
-using MySql.Data.Entity;
+using System.Linq;
+using System.Text.RegularExpressions;
 namespace ISoft.Metabase
 {
     [DbConfigurationType(typeof(MySqlEFConfiguration))]
@@ -162,9 +152,9 @@ namespace ISoft.Metabase
                 if (doneToConfirmContinue != null) doneToConfirmContinue(mTable.Name);
             }
 
-            if (doneToConfirmContinue != null) doneToConfirmContinue("保存中，请稍等...");
+            if (doneToConfirmContinue != null) doneToConfirmContinue("Saving changes, please wait ..");
             SaveChanges();
-            if (doneToConfirmContinue != null) doneToConfirmContinue("完成！");
+            if (doneToConfirmContinue != null) doneToConfirmContinue("Done !");
 
         }
 

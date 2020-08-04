@@ -1,25 +1,12 @@
-﻿using System;
+﻿using EnvDTE80;
+using ISoft.Metabase;
+using System;
 using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
 using System.Data.Common;
 using System.Data.SqlClient;
-using System.Drawing;
 using System.Linq;
-using System.Text;
 using System.Windows.Forms;
-using System.Resources;
-using System.Reflection;
-using System.Globalization;
-using System.IO;
-
-using Microsoft.VisualStudio.CommandBars;
-using Extensibility;
-using EnvDTE;
-using EnvDTE80;
-
 using CF = System.Configuration;
-using ISoft.Metabase;
 namespace ISoft.Coder.Forms
 {
     public partial class frmMain : Form
@@ -49,7 +36,7 @@ namespace ISoft.Coder.Forms
             var connectionSettings = Host.Configuration.ConnectionStrings.ConnectionStrings;
             if (connectionSettings.Count == 0)
             {
-                cb_Connections.Items.Add("—— 请在 .config 文件添加链接串 --");
+                cb_Connections.Items.Add("—— Please add connection string in t.config --");
             }
             else
             {
@@ -149,7 +136,7 @@ namespace ISoft.Coder.Forms
                 try
                 {
                     gb_Startup.Enabled = false;
-                    gb_Console.Text = "执行中，请稍候 ...";
+                    gb_Console.Text = "Running, please wait ..";
                     l_Console.Items.Clear();
                     Refresh();
                     var cache = new List<string>();
@@ -182,7 +169,7 @@ namespace ISoft.Coder.Forms
 
                     Visible = true;
                     if (cache.Count > 0) l_Console.Items.AddRange(cache.ToArray());
-                    l_Console.Items.Add("操作完成");
+                    l_Console.Items.Add("Done");
                     l_Console.SelectedIndex = l_Console.Items.Count - 1;
 
                 }
@@ -193,7 +180,7 @@ namespace ISoft.Coder.Forms
                 finally
                 {
                     gb_Startup.Enabled = true;
-                    gb_Console.Text = "调试信息";
+                    gb_Console.Text = "Log Info ..";
                     BringToFront();
                 }
             };
@@ -207,22 +194,22 @@ namespace ISoft.Coder.Forms
             if (flag == 1)
             {
                 cb_Operations.Items.Clear();
-                cb_Operations.Items.Add("-- 请选择 --");
+                cb_Operations.Items.Add("-- Please Select --");
                 cb_Operations.SelectedIndex = 0;
                 b_Go.Enabled = false;
                 return;
             }
 
             cb_Connections.Items.Clear();
-            cb_Connections.Items.Add("-- 请选择 --");
+            cb_Connections.Items.Add("-- Please Select --");
 
             cb_Objects.Items.Clear();
-            cb_Objects.Items.Add("-- 请选择 --");
+            cb_Objects.Items.Add("-- Please Select --");
             cb_Objects.Items.Add("MS SQLServer");
             cb_Objects.Items.Add("MySQL");
 
             cb_Operations.Items.Clear();
-            cb_Operations.Items.Add("-- 请选择 --");
+            cb_Operations.Items.Add("-- Please Select --");
 
             cb_Connections.SelectedIndex = 0;
             cb_Objects.SelectedIndex = 0;
