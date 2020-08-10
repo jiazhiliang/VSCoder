@@ -216,15 +216,5 @@ namespace ISoft.Coder
             }
         }
 
-        private void _Do_3(Func<string, bool> doneToConfirmContinue = null)
-        {
-            doneToConfirmContinue?.Invoke("Do3");
-        }
-
-        private void _Do_4(Func<string, bool> doneToConfirmContinue = null)
-        {
-            doneToConfirmContinue?.Invoke("Do4");
-        }
-
     }
 }

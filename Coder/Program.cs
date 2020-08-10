@@ -13,7 +13,7 @@ namespace ISoft.Coder
         /// <summary>
         /// Factory run (async)
         /// </summary>
-        public static async void Go(DTE2 app)
+        public static void Go(DTE2 app)
         {
             if (_MainForm != null) _MainForm.Close();
             _MainForm = new Forms.frmMain(app);
@@ -26,7 +26,7 @@ namespace ISoft.Coder
             get
             {
                 var map = new CF.ExeConfigurationFileMap();
-                map.ExeConfigFilename = @"d:\t.config";
+                map.ExeConfigFilename = @"d:\templates\t.config";
                 _Configuration = CF.ConfigurationManager.OpenMappedExeConfiguration(map, CF.ConfigurationUserLevel.None);
                 return _Configuration;
             }

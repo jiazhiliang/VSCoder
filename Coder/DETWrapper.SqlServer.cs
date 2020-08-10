@@ -106,6 +106,9 @@ namespace ISoft.Coder
                 case 4:
                     _Do_4(doneToConfirmContinue);
                     break;
+                case 5:
+                    _Do_5(doneToConfirmContinue);
+                    break;
             }
         }
 
