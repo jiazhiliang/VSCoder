@@ -120,10 +120,9 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="DETWrapper.MySql.cs" />
-    <Compile Include="DETWrapper.SqlServer.Framework.ABP.3.cs" />
-    <Compile Include="DETWrapper.SqlServer.Framework.ABP.2.cs" />
-    <Compile Include="DETWrapper.SqlServer.Framework.ABP.1.cs" />
-    <Compile Include="DETWrapper.SqlServer.Ex.cs" />
+    <Compile Include="DETWrapper.SqlServer.Framework.ABP.5.Context.cs" />
+    <Compile Include="DETWrapper.SqlServer.Framework.ABP.4.DTO.cs" />
+    <Compile Include="DETWrapper.SqlServer.Framework.ABP.3.Entity.cs" />
     <Compile Include="Forms\frmMain.cs">
       <SubType>Form</SubType>
     </Compile>

@@ -242,7 +242,7 @@ namespace ISoft.Coder
                         {
                             // New file and insert at the end line
                             file = folder.ProjectItems.AddFromTemplate(
-                                TemplateFile, string.Format("{0}.{1}.cs", _Identifier, index.ToString("D2")));
+                                DefaultTemplateFile, string.Format("{0}.{1}.cs", _Identifier, index.ToString("D2")));
                             win = file.Open(Constants.vsViewKindCode);
                             win.Activate();
                             win.Document.Activate();

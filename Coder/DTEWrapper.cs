@@ -24,14 +24,7 @@ namespace ISoft.Coder
         /// <summary>
         /// Template file location (local drive)
         /// </summary>
-        public string TemplateFile
-        {
-            get
-            {
-                string key = string.Format("{0}", _Identifier);
-                return Host.Configuration.AppSettings.Settings[key].Value;
-            }
-        }
+        public string DefaultTemplateFile => GetTemplatePath(_Identifier);
 
         public string GetTemplatePath(string key)
         {

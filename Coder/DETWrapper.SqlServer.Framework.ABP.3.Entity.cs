@@ -1,7 +1,5 @@
 ﻿using EnvDTE;
-
 using ISoft.Metabase;
-
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -11,10 +9,6 @@ namespace ISoft.Coder
 {
     public partial class SqlServerClassGenWrapper
     {
-        /// <summary>
-        /// Write an entity file
-        /// </summary>
-        /// <param name="doneToConfirmContinue"></param>
         private void _Do_2(Func<string, bool> doneToConfirmContinue = null)
         {
             if (string.IsNullOrEmpty(_Namespace))
@@ -23,6 +17,7 @@ namespace ISoft.Coder
                 return;
             }
 
+            var template = GetTemplatePath("ABP.Entity");
             var now = DateTime.Now;
             var projects = (Array)_App.ActiveSolutionProjects;
             if (projects.Length > 0)
@@ -44,8 +39,7 @@ namespace ISoft.Coder
                         var t = tables[i];
 
                         // 创建新文件，并且在最后方插入
-                        file = folder.ProjectItems.AddFromTemplate(
-                            TemplateFile, string.Format("{0}.cs", t.Name));
+                        file = folder.ProjectItems.AddFromTemplate(template, $"{t.Name}.cs");
                         win = file.Open(Constants.vsViewKindCode);
                         win.Activate();
                         win.Document.Activate();
@@ -56,7 +50,7 @@ namespace ISoft.Coder
                         // 插入生成日期
                         ts.Insert(@"/// <summary>");
                         ts.NewLine();
-                        ts.Insert(string.Format(@"{0}", now.ToString()));
+                        ts.Insert($"{now}");
                         ts.NewLine();
                         ts.Insert(@"</summary>");
                         ts.NewLine();
@@ -68,7 +62,6 @@ namespace ISoft.Coder
                         ts.NewLine();
                         ts.Insert("{");
                         ts.NewLine();
-
 
                         List<string> keys = new List<string>();
                         if (!
@@ -84,17 +77,6 @@ namespace ISoft.Coder
                         // 说明
                         if (_Context.IsMySql)
                         {
-                            if (!string.IsNullOrEmpty(t.Caption))
-                            {
-                                ts.Insert(@"/// <summary>");
-                                ts.NewLine();
-                                ts.Insert(string.Format(@"{0}", t.Caption.ToStringEx()));
-                                ts.NewLine();
-                                ts.Insert(@"</summary>");
-                                ts.NewLine();
-                                ts.SelectLine();
-                                ts.Insert(" ");
-                            }
                         }
                         else
                         {
@@ -104,7 +86,7 @@ namespace ISoft.Coder
                                 {
                                     ts.Insert(@"/// <summary>");
                                     ts.NewLine();
-                                    ts.Insert(string.Format(@"{0}", d.Value));
+                                    ts.Insert($"{d.Value}");
                                     ts.NewLine();
                                     ts.Insert(@"</summary>");
                                     ts.NewLine();
@@ -113,30 +95,67 @@ namespace ISoft.Coder
                                 });
                         }
 
+                        if (keys.Count == 0)
+                        {
+                            doneToConfirmContinue($"Error: no primary key found for {t.Name}");
+                            return;
+                        }
+
+                        // Decide base class
+                        var isCompoundKey = keys.Count > 1;
+                        var singleKeyType = string.Empty;
+                        var baseType = "Entity";
+
+                        if (!
+                            isCompoundKey)
+                        {
+                            singleKeyType = _getType(columns.First(c => c.Name == keys[0]));
+                        }
+
+                        if (columns.Exists(c => c.Name == "CreationTime" && c.Type.StartsWith("datetime")) &&
+                            columns.Exists(c => c.Name == "CreatorId" && c.Type.StartsWith("uniqueidentifier")))
+                        {
+                            baseType = "CreationAuditedEntity";
+
+                            if (columns.Exists(c => c.Name == "LastModificationTime" && c.Type.StartsWith("datetime")) &&
+                                columns.Exists(c => c.Name == "LastModifierId" && c.Type.StartsWith("uniqueidentifier")))
+                            {
+                                baseType = "AuditedEntity";
+
+                                if (columns.Exists(c => c.Name == "DeletionTime" && c.Type.StartsWith("datetime")) &&
+                                    columns.Exists(c => c.Name == "DeleterId" && c.Type.StartsWith("uniqueidentifier")) &&
+                                    columns.Exists(c => c.Name == "IsDeleted" && c.Type.StartsWith("bit")))
+                                {
+                                    baseType = "FullAuditedEntity";
+                                }
+                            }
+                        }
+
+                        if (!isCompoundKey)
+                        {
+                            baseType += $"<{singleKeyType}>";
+                        }
+
                         // 表格名字
-                        ts.Insert("[Serializable]");
                         ts.NewLine();
-                        ts.Insert(string.Format("[Table(\"{0}\")]", t.Name));
+                        ts.Insert($"public partial class BO_{t.Name}:{baseType}{{");
                         ts.NewLine();
-                        ts.Insert(string.Format("public partial class TB_{0}:TBObject<TB_{0}>{{", t.Name));
+
+                        // public constructor
+                        ts.Insert($"public BO_{t.Name}();");
                         ts.NewLine();
-                        //ts.Insert(string.Format("public partial class ET_{0} {{", t.Name));
-                        //ts.NewLine();
+
+                        if (isCompoundKey)
+                        {
+                            ts.Insert($"public override object[] GetKeys() => new object[] {{ {t.KeyInfo} }};");
+                            ts.NewLine();
+                        }
+
                         columns.ForEach(c =>
                         {
+                            // Summary
                             if (_Context.IsMySql)
                             {
-                                if (!string.IsNullOrEmpty(c.Caption))
-                                {
-                                    ts.Insert(@"/// <summary>");
-                                    ts.NewLine();
-                                    ts.Insert(string.Format(@"{0}", c.Caption));
-                                    ts.NewLine();
-                                    ts.Insert(@"</summary>");
-                                    ts.NewLine();
-                                    ts.SelectLine();
-                                    ts.Insert(" ");
-                                }
                             }
                             else
                             {
@@ -148,44 +167,13 @@ namespace ISoft.Coder
                                     {
                                         ts.Insert(@"/// <summary>");
                                         ts.NewLine();
-                                        ts.Insert(string.Format(@"{0}", d.Value));
+                                        ts.Insert($"{d.Value}");
                                         ts.NewLine();
                                         ts.Insert(@"</summary>");
                                         ts.NewLine();
                                         ts.SelectLine();
                                         ts.Insert(" ");
                                     });
-                            }
-
-                            if (t.KeyInfo.ToStringEx(string.Empty).Contains(c.Name))
-                            {
-                                //var singleKey = !t.KeyInfo.ToStringEx(string.Empty).Contains(",");
-                                //if (singleKey && c.Type.Contains("int"))
-                                //{
-                                //    ts.Insert(@"[Key*]"); // 人为编译不成功，mySql 的问题
-                                //}
-                                //else
-                                //{
-                                //    ts.Insert(@"[Key]");
-                                //}
-
-                                ts.Insert(@"[Key]");
-                                ts.NewLine();
-
-                            }
-
-                            ts.Insert(string.Format(@"[Column(Order = {0})]", c.Ordinal));
-                            ts.NewLine();
-
-                            if (c.CharMaxLength.HasValue &&
-                                    !c.Type.Contains("blob") &&
-                                    !c.Type.Contains("long") &&
-                                    !c.Type.Contains("text")
-                                    //!c.Spec.Contains("char(36)") // guid
-                                    )
-                            {
-                                ts.Insert(string.Format(@"[MaxLength({0})]", c.CharMaxLength));
-                                ts.NewLine();
                             }
 
                             var s = "public ";
@@ -208,6 +196,7 @@ namespace ISoft.Coder
                         ts.Insert("}");
                         ts.NewLine();
                         ts.SelectAll();
+
                         _App.ExecuteCommand("Edit.FormatDocument");
                         win.Close(vsSaveChanges.vsSaveChangesYes);
 

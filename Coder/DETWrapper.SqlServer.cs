@@ -106,9 +106,6 @@ namespace ISoft.Coder
                 case 4:
                     _Do_4(doneToConfirmContinue);
                     break;
-                case 5:
-                    _Do_5(doneToConfirmContinue);
-                    break;
             }
         }
 
@@ -128,26 +125,26 @@ namespace ISoft.Coder
             {
                 case _Types.t_bit:
                 case _Types.t_boolean:
-                    return (c.Nullable) ? "Nullable<bool>" : "bool";
+                    return (c.Nullable) ? "bool?" : "bool";
                 case _Types.t_tinyint:
-                    return (c.Nullable) ? "Nullable<byte>" : "byte";
+                    return (c.Nullable) ? "byte?" : "byte";
                 case _Types.t_smallint:
-                    return (c.Nullable) ? "Nullable<short>" : "short";
+                    return (c.Nullable) ? "short?" : "short";
                 case _Types.t_year:
-                    return (c.Nullable) ? "Nullable<short>" : "short";
+                    return (c.Nullable) ? "short?" : "short";
                 case _Types.t_int:
-                    return (c.Nullable) ? "Nullable<int>" : "int";
+                    return (c.Nullable) ? "int?" : "int";
                 case _Types.t_integer:
-                    return (c.Nullable) ? "Nullable<int>" : "int";
+                    return (c.Nullable) ? "int?" : "int";
                 case _Types.t_mediumint:
-                    return (c.Nullable) ? "Nullable<int>" : "int";
+                    return (c.Nullable) ? "int?" : "int";
                 case _Types.t_bigint:
-                    return (c.Nullable) ? "Nullable<long>" : "long";
+                    return (c.Nullable) ? "long?" : "long";
                 case _Types.t_float:
-                    return (c.Nullable) ? "Nullable<double>" : "double";
+                    return (c.Nullable) ? "double?" : "double";
                 case _Types.t_double:
                 case _Types.t_real:
-                    return (c.Nullable) ? "Nullable<float>" : "float";
+                    return (c.Nullable) ? "float?" : "float";
                 case _Types.t_rowversion:
                     return "byte[]";
                 case _Types.t_numeric:
@@ -155,28 +152,28 @@ namespace ISoft.Coder
                 case _Types.t_dec:
                 case _Types.t_fixed:
                 case _Types.t_serial:
-                    return (c.Nullable) ? "Nullable<decimal>" : "decimal";
+                    return (c.Nullable) ? "decimal?" : "decimal";
                 case _Types.t_date:
                 case _Types.t_datetime:
                 case _Types.t_datetime2:
-                    return (c.Nullable) ? "Nullable<DateTime>" : "DateTime";
+                    return (c.Nullable) ? "DateTime?" : "DateTime";
                 case _Types.t_timestamp:
-                    if (_Context.IsMySql) return (c.Nullable) ? "Nullable<DateTime>" : "DateTime";
+                    if (_Context.IsMySql) return (c.Nullable) ? "DateTime?" : "DateTime";
                     return "byte[]";
                 case _Types.t_datetimeoffset:
-                    return (c.Nullable) ? "Nullable<System.DateTimeOffset>" : "System.DateTimeOffset";
+                    return (c.Nullable) ? "DateTimeOffset?" : "DateTimeOffset";
                 case _Types.t_time:
-                    return (c.Nullable) ? "Nullable<System.TimeSpan>" : "System.TimeSpan";
+                    return (c.Nullable) ? "TimeSpan?" : "TimeSpan";
 
                 case _Types.t_smalldatetime:
-                    return (c.Nullable) ? "Nullable<DateTime>" : "DateTime";
+                    return (c.Nullable) ? "DateTime?" : "DateTime";
                 case _Types.t_image:
                     return "byte[]";
                 case _Types.t_money:
                 case _Types.t_smallmoney:
-                    return (c.Nullable) ? "Nullable<decimal>" : "decimal";
+                    return (c.Nullable) ? "decimal?" : "decimal";
                 case _Types.t_uniqueidentifier:
-                    return (c.Nullable) ? "Nullable<Guid>" : "Guid";
+                    return (c.Nullable) ? "Guid?" : "Guid";
                 case _Types.t_char:
                     return "string";
                 case _Types.t_varchar:
@@ -204,6 +201,69 @@ namespace ISoft.Coder
                     return (c.Nullable) ? "Nullable<System.Data.Spatial.DbGeography>" : "System.Data.Spatial.DbGeography";
                 case _Types.t_sql_variant:
                     return "object";
+            }
+
+            return string.Empty;
+        }
+
+        private string _getSqlType(MBColumn c)
+        {
+            switch (c.Type)
+            {
+                case _Types.t_bit:
+                case _Types.t_boolean:
+                case _Types.t_tinyint:
+                case _Types.t_smallint:
+                case _Types.t_year:
+                case _Types.t_int:
+                case _Types.t_integer:
+                case _Types.t_mediumint:
+                case _Types.t_bigint:
+                case _Types.t_float:
+                case _Types.t_double:
+                case _Types.t_real:
+                case _Types.t_rowversion:
+                case _Types.t_dec:
+                case _Types.t_fixed:
+                case _Types.t_serial:
+                case _Types.t_date:
+                case _Types.t_datetime:
+                case _Types.t_timestamp:
+                case _Types.t_smalldatetime:
+                case _Types.t_image:
+                case _Types.t_money:
+                case _Types.t_smallmoney:
+                case _Types.t_uniqueidentifier:
+                case _Types.t_tinytext:
+                case _Types.t_text:
+                case _Types.t_mediumtext:
+                case _Types.t_longtext:
+                case _Types.t_set:
+                case _Types.t_enum:
+                case _Types.t_ntext:
+                case _Types.t_xml:
+                case _Types.t_blob:
+                case _Types.t_tinyblob:
+                case _Types.t_mediumblob:
+                case _Types.t_longblob:
+                case _Types.t_spatial_geometry:
+                case _Types.t_spatial_geography:
+                case _Types.t_sql_variant:
+                    return c.Type;
+                case _Types.t_datetime2:
+                case _Types.t_datetimeoffset:
+                case _Types.t_time:
+                    return $"{c.Type}({c.DateTimePrecision})";
+                case _Types.t_numeric:
+                case _Types.t_decimal:
+                    return $"{c.Type}({c.NumericPrecision},{c.NumericScale})";
+                case _Types.t_char:
+                case _Types.t_varchar:
+                case _Types.t_nchar:
+                case _Types.t_nvarchar:
+                case _Types.t_binary:
+                case _Types.t_varbinary:
+                    return $"{c.Type}({c.CharMaxLength})";
             }
 
             return string.Empty;
@@ -248,7 +308,7 @@ namespace ISoft.Coder
                         {
                             // 创建新文件，并且在最后方插入
                             file = folder.ProjectItems.AddFromTemplate(
-                                TemplateFile, string.Format("{0}.{1}.cs", _Identifier, index.ToString("D2")));
+                                DefaultTemplateFile, string.Format("{0}.{1}.cs", _Identifier, index.ToString("D2")));
                             win = file.Open(Constants.vsViewKindCode);
                             win.Activate();
                             win.Document.Activate();

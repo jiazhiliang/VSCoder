@@ -1,22 +1,8 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text.RegularExpressions;
-using System.Linq.Expressions;
-using System.Text;
 using System.Data;
 using System.Data.Common;
-using System.Data.SqlClient;
 using System.Data.Entity;
-using System.Data.Entity.Infrastructure;
-using System.Data.Entity.ModelConfiguration.Conventions;
-using System.Data.Entity.Core;
-using System.Data.Entity.Core.Objects;
-using System.Reflection;
-using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
-using LinqKit;
 
 namespace ISoft.Metabase
 {
@@ -26,10 +12,10 @@ namespace ISoft.Metabase
         public abstract void ResolveTableAttributes(DataRowView rv, MBTable table);
         public abstract void ResolveTablePrimaryKey(
             Database db, DbSet<MBProperty> properties, MBTable table);
-        public abstract void ResolveTableCaption(
+        public abstract void ResolveTableProperties(
             Database db, DbSet<MBProperty> properties, MBTable table);
         public abstract void ResolveColumnAttributes(DataRowView rv, MBColumn column);
-        public abstract void ResolveColumnCaption(
+        public abstract void ResolveColumnProperties(
             Database db, DbSet<MBProperty> properties, MBTable table, MBColumn column);
 
     }
@@ -64,7 +50,7 @@ namespace ISoft.Metabase
             }
         }
 
-        public override void ResolveTableCaption(Database db, DbSet<MBProperty> properties, MBTable table)
+        public override void ResolveTableProperties(Database db, DbSet<MBProperty> properties, MBTable table)
         {
             var cmd = db.Connection.CreateCommand();
             cmd.CommandText = string.Format(propertyGet_Table, table.Name);
@@ -73,7 +59,7 @@ namespace ISoft.Metabase
             {
                 if (reader.HasRows)
                 {
-                    if (reader.Read())
+                    while (reader.Read())
                     {
                         var objValue = reader.GetValue(3);
                         var mProperty = new MBProperty()
@@ -83,6 +69,13 @@ namespace ISoft.Metabase
                             Name = reader.GetString(2).ToString(),
                             Value = objValue == null ? null : objValue.ToString()
                         };
+
+                        switch (mProperty.Name)
+                        {
+                            case "Caption":
+                                table.Caption = mProperty.Value;
+                                break;
+                        }
 
                         properties.Add(mProperty);
                     }
@@ -120,7 +113,7 @@ namespace ISoft.Metabase
                     int.Parse(rv["DATETIME_PRECISION"].ToString());
         }
 
-        public override void ResolveColumnCaption(Database db, DbSet<MBProperty> properties, MBTable table, MBColumn column)
+        public override void ResolveColumnProperties(Database db, DbSet<MBProperty> properties, MBTable table, MBColumn column)
         {
             var cmd = db.Connection.CreateCommand();
             cmd = db.Connection.CreateCommand();
@@ -130,7 +123,7 @@ namespace ISoft.Metabase
             {
                 if (reader.HasRows)
                 {
-                    if (reader.Read())
+                    while (reader.Read())
                     {
                         var objValue = reader.GetValue(3);
                         var mProperty = new MBProperty()
@@ -140,6 +133,13 @@ namespace ISoft.Metabase
                             Name = reader.GetString(2).ToString(),
                             Value = objValue == null ? null : objValue.ToString()
                         };
+
+                        switch (mProperty.Name)
+                        {
+                            case "Caption":
+                                column.Caption = mProperty.Value;
+                                break;
+                        }
 
                         properties.Add(mProperty);
                     }
@@ -178,7 +178,7 @@ namespace ISoft.Metabase
             }
         }
 
-        public override void ResolveTableCaption(Database db, DbSet<MBProperty> properties, MBTable table)
+        public override void ResolveTableProperties(Database db, DbSet<MBProperty> properties, MBTable table)
         {
         }
 
@@ -219,7 +219,7 @@ namespace ISoft.Metabase
 
         }
 
-        public override void ResolveColumnCaption(Database db, DbSet<MBProperty> properties, MBTable table, MBColumn column)
+        public override void ResolveColumnProperties(Database db, DbSet<MBProperty> properties, MBTable table, MBColumn column)
         {
         }
 

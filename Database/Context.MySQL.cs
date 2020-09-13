@@ -123,7 +123,7 @@ namespace ISoft.Metabase
 
                 _Resolver.ResolveTableAttributes(dvT[i], mTable);
                 _Resolver.ResolveTablePrimaryKey(Database, Properties, mTable);
-                _Resolver.ResolveTableCaption(Database, Properties, mTable);
+                _Resolver.ResolveTableProperties(Database, Properties, mTable);
 
                 dvC.Sort = "TABLE_NAME ASC, COLUMN_NAME ASC";
                 dvC.RowFilter = string.Format(
@@ -145,7 +145,7 @@ namespace ISoft.Metabase
                     Columns.Add(mColumn);
 
                     _Resolver.ResolveColumnAttributes(dvC[j], mColumn);
-                    _Resolver.ResolveColumnCaption(Database, Properties, mTable, mColumn);
+                    _Resolver.ResolveColumnProperties(Database, Properties, mTable, mColumn);
 
                 }
 
