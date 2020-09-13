@@ -114,8 +114,8 @@ namespace ISoft.Coder.Forms
                         new SqlServerEFContext(connection, new Metabase.SqlServerPropertyResolver()), _App,
                         tb_Namespace.Text.Trim(), t =>
                             !new string[]
-                            { 
-                                //"____table", "____column", "____property"
+                            {
+                                "____table", "____column", "____property",
                                 "sysdiagrams"
                             }.Contains(t.Name.ToLower())
                         );
@@ -125,8 +125,8 @@ namespace ISoft.Coder.Forms
                         new MySqlEFContext(connection, new Metabase.MySqlPropertyResolver()), _App,
                         tb_Namespace.Text.Trim(), t =>
                             !new string[]
-                            { 
-                                //"____table", "____column", "____property"
+                            {
+                                "____table", "____column", "____property",
                                 "sysdiagrams"
                             }.Contains(t.Name.ToLower())
                         );

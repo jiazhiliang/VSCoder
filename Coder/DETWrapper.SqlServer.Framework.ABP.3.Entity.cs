@@ -26,16 +26,50 @@ namespace ISoft.Coder
             Window win = null;
             TextSelection ts = null;
 
-            int batchIndex = 0;
-            int batchSize = 50;
+            var batchIndex = -1;
+            var batchSize = 100;
+            var saved = true;
 
             Action<ProjectItem> _newFile = f =>
             {
-                // 创建新文件，并且在最后方插入
-                file = f.ProjectItems.AddFromTemplate(template, $"BO{batchIndex.ToString("D4")}.cs");
+                batchIndex++;
+                file = f.ProjectItems.AddFromTemplate(template, $"BO.{batchIndex.ToString("D4")}.cs");
                 win = file.Open(Constants.vsViewKindCode);
                 win.Activate();
                 win.Document.Activate();
+
+                ts = _App.ActiveDocument.Selection as TextSelection;
+                ts.EndOfDocument();
+
+                // 插入生成日期
+                ts.Insert(@"/// <summary>");
+                ts.NewLine();
+                ts.Insert($"{now}");
+                ts.NewLine();
+                ts.Insert(@"</summary>");
+                ts.NewLine();
+                ts.SelectLine();
+                ts.Insert(" ");
+
+                // 插入 namespace 行
+                ts.Insert("namespace " + _Namespace);
+                ts.NewLine();
+                ts.Insert("{");
+                ts.NewLine();
+
+                saved = false;
+            };
+
+            Action _saveAndClose = () =>
+            {
+                ts.Insert("}");
+                ts.NewLine();
+                ts.SelectAll();
+
+                _App.ExecuteCommand("Edit.FormatDocument");
+                win.Close(vsSaveChanges.vsSaveChangesYes);
+
+                saved = true;
             };
 
             if (projects.Length > 0)
@@ -43,31 +77,18 @@ namespace ISoft.Coder
                 foreach (Project p in projects)
                 {
                     ProjectItem folder = p.ProjectItems
-                            .AddFolder("Entities", Constants.vsProjectItemKindPhysicalFolder);
+                            .AddFolder("_Entities", Constants.vsProjectItemKindPhysicalFolder);
                     List<MBTable> tables =
                         _Context.Tables.Where(_Filter).OrderBy(t => t.Name).ToList();
 
                     for (int i = 0; i < tables.Count; i++)
                     {
-                        if (i % batchSize == 0) _newFile(folder);
+                        if (i % batchSize == 0)
+                        {
+                            _newFile(folder);
+                        }
+
                         var t = tables[i];
-
-                        ts = _App.ActiveDocument.Selection as TextSelection;
-                        ts.EndOfDocument();
-
-                        // 插入生成日期
-                        ts.Insert(@"/// <summary>");
-                        ts.NewLine();
-                        ts.Insert($"{now}");
-                        ts.NewLine();
-                        ts.Insert(@"</summary>");
-                        ts.NewLine();
-
-                        // 插入 namespace 行
-                        ts.Insert("namespace " + _Namespace);
-                        ts.NewLine();
-                        ts.Insert("{");
-                        ts.NewLine();
 
                         List<string> keys = new List<string>();
                         if (!
@@ -96,6 +117,8 @@ namespace ISoft.Coder
                                     ts.NewLine();
                                     ts.Insert(@"</summary>");
                                     ts.NewLine();
+                                    ts.SelectLine();
+                                    ts.Insert(" ");
                                 });
                         }
 
@@ -115,6 +138,7 @@ namespace ISoft.Coder
                             isCompoundKey)
                         {
                             singleKeyType = _getType(columns.First(c => c.Name == keys[0]));
+                            ignoreKeys.Add(keys[0]);
                         }
 
                         if (columns.Exists(c => c.Name == "CreationTime" && c.Type.StartsWith("datetime")) &&
@@ -181,6 +205,8 @@ namespace ISoft.Coder
                                         ts.NewLine();
                                         ts.Insert(@"</summary>");
                                         ts.NewLine();
+                                        ts.SelectLine();
+                                        ts.Insert(" ");
                                     });
                             }
 
@@ -201,14 +227,15 @@ namespace ISoft.Coder
                             if (!doneToConfirmContinue(t.Name)) break;
                         }
 
-                        ts.Insert("}");
-                        ts.NewLine();
-
-                        ts.SelectAll();
-                        _App.ExecuteCommand("Edit.FormatDocument");
-                        win.Close(vsSaveChanges.vsSaveChangesYes);
+                        if (i > 0 && (i % batchSize) == 0)
+                        {
+                            _saveAndClose();
+                        }
 
                     }
+
+                    if (!saved) _saveAndClose();
+
                 }
             }
         }
