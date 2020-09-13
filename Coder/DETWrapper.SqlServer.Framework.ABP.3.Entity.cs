@@ -20,6 +20,24 @@ namespace ISoft.Coder
             var template = GetTemplatePath("ABP.Entity");
             var now = DateTime.Now;
             var projects = (Array)_App.ActiveSolutionProjects;
+
+            // 准备插入代码
+            ProjectItem file = null;
+            Window win = null;
+            TextSelection ts = null;
+
+            int batchIndex = 0;
+            int batchSize = 50;
+
+            Action<ProjectItem> _newFile = f =>
+            {
+                // 创建新文件，并且在最后方插入
+                file = f.ProjectItems.AddFromTemplate(template, $"BO{batchIndex.ToString("D4")}.cs");
+                win = file.Open(Constants.vsViewKindCode);
+                win.Activate();
+                win.Document.Activate();
+            };
+
             if (projects.Length > 0)
             {
                 foreach (Project p in projects)
@@ -29,20 +47,10 @@ namespace ISoft.Coder
                     List<MBTable> tables =
                         _Context.Tables.Where(_Filter).OrderBy(t => t.Name).ToList();
 
-                    // 准备插入代码
-                    ProjectItem file = null;
-                    Window win = null;
-                    TextSelection ts = null;
-
                     for (int i = 0; i < tables.Count; i++)
                     {
+                        if (i % batchSize == 0) _newFile(folder);
                         var t = tables[i];
-
-                        // 创建新文件，并且在最后方插入
-                        file = folder.ProjectItems.AddFromTemplate(template, $"{t.Name}.cs");
-                        win = file.Open(Constants.vsViewKindCode);
-                        win.Activate();
-                        win.Document.Activate();
 
                         ts = _App.ActiveDocument.Selection as TextSelection;
                         ts.EndOfDocument();
@@ -54,8 +62,6 @@ namespace ISoft.Coder
                         ts.NewLine();
                         ts.Insert(@"</summary>");
                         ts.NewLine();
-                        ts.SelectLine();
-                        ts.Insert(" ");
 
                         // 插入 namespace 行
                         ts.Insert("namespace " + _Namespace);
@@ -90,8 +96,6 @@ namespace ISoft.Coder
                                     ts.NewLine();
                                     ts.Insert(@"</summary>");
                                     ts.NewLine();
-                                    ts.SelectLine();
-                                    ts.Insert(" ");
                                 });
                         }
 
@@ -105,6 +109,7 @@ namespace ISoft.Coder
                         var isCompoundKey = keys.Count > 1;
                         var singleKeyType = string.Empty;
                         var baseType = "Entity";
+                        var ignoreKeys = new List<string>();
 
                         if (!
                             isCompoundKey)
@@ -116,16 +121,19 @@ namespace ISoft.Coder
                             columns.Exists(c => c.Name == "CreatorId" && c.Type.StartsWith("uniqueidentifier")))
                         {
                             baseType = "CreationAuditedEntity";
+                            ignoreKeys.AddRange(new string[] { "CreationTime", "CreatorId" });
 
                             if (columns.Exists(c => c.Name == "LastModificationTime" && c.Type.StartsWith("datetime")) &&
                                 columns.Exists(c => c.Name == "LastModifierId" && c.Type.StartsWith("uniqueidentifier")))
                             {
+                                ignoreKeys.AddRange(new string[] { "LastModificationTime", "LastModifierId" });
                                 baseType = "AuditedEntity";
 
                                 if (columns.Exists(c => c.Name == "DeletionTime" && c.Type.StartsWith("datetime")) &&
                                     columns.Exists(c => c.Name == "DeleterId" && c.Type.StartsWith("uniqueidentifier")) &&
                                     columns.Exists(c => c.Name == "IsDeleted" && c.Type.StartsWith("bit")))
                                 {
+                                    ignoreKeys.AddRange(new string[] { "DeletionTime", "DeletionTime", "IsDeleted" });
                                     baseType = "FullAuditedEntity";
                                 }
                             }
@@ -142,7 +150,7 @@ namespace ISoft.Coder
                         ts.NewLine();
 
                         // public constructor
-                        ts.Insert($"public BO_{t.Name}();");
+                        ts.Insert($"public BO_{t.Name}(){{}}");
                         ts.NewLine();
 
                         if (isCompoundKey)
@@ -153,6 +161,8 @@ namespace ISoft.Coder
 
                         columns.ForEach(c =>
                         {
+                            if (ignoreKeys.Contains(c.Name)) return;
+
                             // Summary
                             if (_Context.IsMySql)
                             {
@@ -171,8 +181,6 @@ namespace ISoft.Coder
                                         ts.NewLine();
                                         ts.Insert(@"</summary>");
                                         ts.NewLine();
-                                        ts.SelectLine();
-                                        ts.Insert(" ");
                                     });
                             }
 
@@ -195,8 +203,8 @@ namespace ISoft.Coder
 
                         ts.Insert("}");
                         ts.NewLine();
-                        ts.SelectAll();
 
+                        ts.SelectAll();
                         _App.ExecuteCommand("Edit.FormatDocument");
                         win.Close(vsSaveChanges.vsSaveChangesYes);
 
