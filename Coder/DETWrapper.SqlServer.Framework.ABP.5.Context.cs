@@ -161,8 +161,13 @@ namespace ISoft.Coder
                                 shouldConfig = true;
                             }
 
-                            if (c.Type.StartsWith("decimal") ||
-                                c.Type.StartsWith("datetime2")
+                            if (c.Type.Contains("decimal") ||
+                                c.Type.Contains("datetime2") ||
+                                c.Type.Contains("numeric") ||
+                                c.Type.Contains("money") ||
+                                c.Type.Contains("float") ||
+                                c.Type.Contains("binary") ||
+                                c.Type.Contains("time")
                                 )
                             {
                                 propConfig += $".HasColumnType(\"{_getSqlType(c)}\")";
