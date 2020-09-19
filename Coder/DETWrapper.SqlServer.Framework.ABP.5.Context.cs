@@ -13,7 +13,13 @@ namespace ISoft.Coder
         {
             if (string.IsNullOrEmpty(_Namespace))
             {
-                MessageBox.Show("Please provide a namespace");
+                MessageBox.Show("Please provide a namespace:extensionClassName");
+                return;
+            }
+
+            if (!_Namespace.Contains(":"))
+            {
+                MessageBox.Show("Please provide a namespace:extensionClassName");
                 return;
             }
 
@@ -106,6 +112,11 @@ namespace ISoft.Coder
                             foreach (string part in t.KeyInfo.Split(','))
                                 if (part.Trim().Length > 0) keys.Add(part.Trim());
 
+                        if (keys.Count == 0)
+                        {
+                            throw new Exception($"No primary key(s) found in {t.Name}");
+                        }
+
                         var columns = _Context.Columns
                             .Where(c => c.TableId == t.TableId).OrderBy(c => c.Name).ToList();
                         var properties = _Context.Properties
@@ -121,14 +132,20 @@ namespace ISoft.Coder
                         ts.Insert("                b.ConfigureByConvention();");
                         ts.NewLine();
 
+                        if (keys.Count > 1 || keys[0] != "Id")
+                        {
+                            ts.Insert($"                b.HasKey({ string.Join(", ", keys.Select(k => $"\"{k}\"")) });");
+                            ts.NewLine();
+                        }
+
                         columns.ForEach(c =>
                         {
                             var propConfig = $"                b.Property(x => x.{c.Name})";
                             var shouldConfig = false;
 
-                            if (keys.Count == 1 && c.Name == "Id")
+                            if (keys.Count == 1 && c.Name == keys[0])
                             {
-                                propConfig += $"                b.Property(x => x.Id).HasColumnName(\"{(c.Name)}\")";
+                                propConfig = $"                b.Property(x => x.Id).HasColumnName(\"{(c.Name)}\")";
                                 shouldConfig = true;
                             }
 
