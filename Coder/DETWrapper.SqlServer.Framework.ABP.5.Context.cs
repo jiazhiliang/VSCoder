@@ -3,6 +3,7 @@ using ISoft.Metabase;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 using System.Windows.Forms;
 
 namespace ISoft.Coder
@@ -32,6 +33,7 @@ namespace ISoft.Coder
             ProjectItem file = null;
             Window win = null;
             TextSelection ts = null;
+            StringBuilder sb = null;
 
             var batchIndex = -1;
             var saved = true;
@@ -41,40 +43,37 @@ namespace ISoft.Coder
                 batchIndex++;
                 file = f.ProjectItems.AddFromTemplate(template, $"{parts[1]}.cs");
                 win = file.Open(Constants.vsViewKindCode);
-                win.Activate();
-                win.Document.Activate();
+                sb = new StringBuilder();
 
-                ts = _App.ActiveDocument.Selection as TextSelection;
-                ts.EndOfDocument();
+                ts = win.Document.Selection as TextSelection;
+                // ts.EndOfDocument();
 
                 // 插入生成日期
-                ts.Insert(@"/// <summary>");
-                ts.NewLine();
-                ts.Insert($"{now}");
-                ts.NewLine();
-                ts.Insert(@"</summary>");
-                ts.NewLine();
-                ts.SelectLine();
-                ts.Insert(" ");
+                sb.AppendLine(@"/// <summary>");
+                sb.AppendLine($"/// {now}");
+                sb.AppendLine(@"/// </summary>");
 
                 // 插入 namespace 行
-                ts.Insert("namespace " + parts[0]);
-                ts.NewLine();
-                ts.Insert("{");
-                ts.NewLine();
+                sb.AppendLine("namespace " + parts[0]);
+                sb.AppendLine("{");
 
                 saved = false;
             };
 
             Action _saveAndClose = () =>
             {
+                ts.EndOfDocument();
+                ts.Insert(sb.ToString());
                 ts.Insert("}");
                 ts.NewLine();
                 ts.SelectAll();
 
-                _App.ExecuteCommand("Edit.FormatDocument");
-                win.Close(vsSaveChanges.vsSaveChangesYes);
+                win.Activate();
+                win.Document.Activate();
 
+                _App.ExecuteCommand("Edit.FormatDocument");
+
+                win.Close(vsSaveChanges.vsSaveChangesYes);
                 saved = true;
             };
 
@@ -89,18 +88,13 @@ namespace ISoft.Coder
 
                     _newFile(folder);
 
-                    ts.Insert($"public static class {parts[1]}");
-                    ts.NewLine();
-                    ts.Insert("{");
-                    ts.NewLine();
+                    sb.AppendLine($"public static class {parts[1]}");
+                    sb.AppendLine("{");
 
-                    ts.Insert($"public static void ConfigureInternal(this ModelBuilder builder)");
-                    ts.NewLine();
-                    ts.Insert("{");
-                    ts.NewLine();
+                    sb.AppendLine($"public static void ConfigureInternal(this ModelBuilder builder)");
+                    sb.AppendLine("{");
 
-                    ts.Insert($"Check.NotNull(builder, nameof(builder));");
-                    ts.NewLine();
+                    sb.AppendLine($"Check.NotNull(builder, nameof(builder));");
 
                     for (int i = 0; i < tables.Count; i++)
                     {
@@ -114,7 +108,8 @@ namespace ISoft.Coder
 
                         if (keys.Count == 0)
                         {
-                            throw new Exception($"No primary key(s) found in {t.Name}");
+                            doneToConfirmContinue($"Error: no primary key found for {t.Name}");
+                            continue;
                         }
 
                         var columns = _Context.Columns
@@ -123,19 +118,14 @@ namespace ISoft.Coder
                             .Where(d => d.TableId == t.TableId).ToList();
 
 
-                        ts.Insert($"            builder.Entity<BO_{t.Name}>(b =>");
-                        ts.NewLine();
-                        ts.Insert("{");
-                        ts.NewLine();
-                        ts.Insert($"                b.ToTable(\"{t.Name}\", AbpCommonDbProperties.DbSchema);");
-                        ts.NewLine();
-                        ts.Insert("                b.ConfigureByConvention();");
-                        ts.NewLine();
+                        sb.AppendLine($"            builder.Entity<BO_{t.Name}>(b =>");
+                        sb.AppendLine("             {");
+                        sb.AppendLine($"                b.ToTable(\"{t.Name}\", AbpCommonDbProperties.DbSchema);");
+                        sb.AppendLine("                 b.ConfigureByConvention();");
 
                         if (keys.Count > 1 || keys[0] != "Id")
                         {
-                            ts.Insert($"                b.HasKey({ string.Join(", ", keys.Select(k => $"\"{k}\"")) });");
-                            ts.NewLine();
+                            sb.AppendLine($"                b.HasKey({ string.Join(", ", keys.Select(k => $"\"{k}\"")) });");
                         }
 
                         columns.ForEach(c =>
@@ -176,14 +166,12 @@ namespace ISoft.Coder
 
                             if (shouldConfig)
                             {
-                                ts.Insert($"                {propConfig};");
-                                ts.NewLine();
+                                sb.AppendLine($"                {propConfig};");
                             }
 
                         });
 
-                        ts.Insert("            });");
-                        ts.NewLine();
+                        sb.AppendLine("            });");
 
                         if (doneToConfirmContinue != null)
                         {
@@ -192,10 +180,8 @@ namespace ISoft.Coder
 
                     }
 
-                    ts.Insert("}");
-                    ts.NewLine();
-                    ts.Insert("}");
-                    ts.NewLine();
+                    sb.AppendLine("}");
+                    sb.AppendLine("}");
 
                     if (!saved) _saveAndClose();
 

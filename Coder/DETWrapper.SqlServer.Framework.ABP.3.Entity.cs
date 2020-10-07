@@ -3,6 +3,7 @@ using ISoft.Metabase;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 using System.Windows.Forms;
 
 namespace ISoft.Coder
@@ -25,6 +26,7 @@ namespace ISoft.Coder
             ProjectItem file = null;
             Window win = null;
             TextSelection ts = null;
+            StringBuilder sb = null;
 
             var batchIndex = -1;
             var batchSize = 100;
@@ -35,40 +37,37 @@ namespace ISoft.Coder
                 batchIndex++;
                 file = f.ProjectItems.AddFromTemplate(template, $"BO.{batchIndex.ToString("D4")}.cs");
                 win = file.Open(Constants.vsViewKindCode);
-                win.Activate();
-                win.Document.Activate();
+                sb = new StringBuilder();
 
-                ts = _App.ActiveDocument.Selection as TextSelection;
-                ts.EndOfDocument();
+                ts = win.Document.Selection as TextSelection;
+                // ts.EndOfDocument();
 
                 // 插入生成日期
-                ts.Insert(@"/// <summary>");
-                ts.NewLine();
-                ts.Insert($"{now}");
-                ts.NewLine();
-                ts.Insert(@"</summary>");
-                ts.NewLine();
-                ts.SelectLine();
-                ts.Insert(" ");
+                sb.AppendLine(@"/// <summary>");
+                sb.AppendLine($"/// {now}");
+                sb.AppendLine(@"/// </summary>");
 
                 // 插入 namespace 行
-                ts.Insert("namespace " + _Namespace);
-                ts.NewLine();
-                ts.Insert("{");
-                ts.NewLine();
+                sb.AppendLine("namespace " + _Namespace);
+                sb.AppendLine("{");
 
                 saved = false;
             };
 
             Action _saveAndClose = () =>
             {
+                ts.EndOfDocument();
+                ts.Insert(sb.ToString());
                 ts.Insert("}");
                 ts.NewLine();
                 ts.SelectAll();
 
-                _App.ExecuteCommand("Edit.FormatDocument");
-                win.Close(vsSaveChanges.vsSaveChangesYes);
+                win.Activate();
+                win.Document.Activate();
 
+                _App.ExecuteCommand("Edit.FormatDocument");
+
+                win.Close(vsSaveChanges.vsSaveChangesYes);
                 saved = true;
             };
 
@@ -111,21 +110,16 @@ namespace ISoft.Coder
                                 d.Field == string.Empty && d.Name == FIELD_SUMMARY &&
                                 !string.IsNullOrEmpty(d.Value)).IfNN(d =>
                                 {
-                                    ts.Insert(@"/// <summary>");
-                                    ts.NewLine();
-                                    ts.Insert($"{d.Value}");
-                                    ts.NewLine();
-                                    ts.Insert(@"</summary>");
-                                    ts.NewLine();
-                                    ts.SelectLine();
-                                    ts.Insert(" ");
+                                    sb.AppendLine(@"/// <summary>");
+                                    sb.AppendLine($"/// {d.Value}");
+                                    sb.AppendLine(@"/// </summary>");
                                 });
                         }
 
                         if (keys.Count == 0)
                         {
                             doneToConfirmContinue($"Error: no primary key found for {t.Name}");
-                            return;
+                            continue;
                         }
 
                         // Decide base class
@@ -157,7 +151,7 @@ namespace ISoft.Coder
                                     columns.Exists(c => c.Name == "DeleterId" && c.Type.StartsWith("uniqueidentifier")) &&
                                     columns.Exists(c => c.Name == "IsDeleted" && c.Type.StartsWith("bit")))
                                 {
-                                    ignoreKeys.AddRange(new string[] { "DeletionTime", "DeletionTime", "IsDeleted" });
+                                    ignoreKeys.AddRange(new string[] { "DeletionTime", "DeleterId", "IsDeleted" });
                                     baseType = "FullAuditedEntity";
                                 }
                             }
@@ -169,18 +163,14 @@ namespace ISoft.Coder
                         }
 
                         // 表格名字
-                        ts.NewLine();
-                        ts.Insert($"public partial class BO_{t.Name}:{baseType}{{");
-                        ts.NewLine();
+                        sb.AppendLine($"public partial class BO_{t.Name}:{baseType}{{");
 
                         // public constructor
-                        ts.Insert($"public BO_{t.Name}(){{}}");
-                        ts.NewLine();
+                        sb.AppendLine($"public BO_{t.Name}(){{}}");
 
                         if (isCompoundKey)
                         {
-                            ts.Insert($"public override object[] GetKeys() => new object[] {{ {t.KeyInfo} }};");
-                            ts.NewLine();
+                            sb.AppendLine($"public override object[] GetKeys() => new object[] {{ {t.KeyInfo} }};");
                         }
 
                         columns.ForEach(c =>
@@ -199,14 +189,9 @@ namespace ISoft.Coder
                                     d.Field == c.Name && d.Name == FIELD_SUMMARY &&
                                     !string.IsNullOrEmpty(d.Value)).IfNN(d =>
                                     {
-                                        ts.Insert(@"/// <summary>");
-                                        ts.NewLine();
-                                        ts.Insert($"{d.Value}");
-                                        ts.NewLine();
-                                        ts.Insert(@"</summary>");
-                                        ts.NewLine();
-                                        ts.SelectLine();
-                                        ts.Insert(" ");
+                                        sb.AppendLine(@"/// <summary>");
+                                        sb.AppendLine($"/// {d.Value}");
+                                        sb.AppendLine(@"/// </summary>");
                                     });
                             }
 
@@ -215,19 +200,17 @@ namespace ISoft.Coder
                             s += c.Name;
                             s += " { get; set; }";
 
-                            ts.Insert(s);
-                            ts.NewLine();
+                            sb.AppendLine(s);
                         });
 
-                        ts.Insert("}");
-                        ts.NewLine();
+                        sb.AppendLine("}");
 
                         if (doneToConfirmContinue != null)
                         {
                             if (!doneToConfirmContinue(t.Name)) break;
                         }
 
-                        if (i > 0 && (i % batchSize) == 0)
+                        if (i > 0 && ((i + 1) % batchSize) == 0)
                         {
                             _saveAndClose();
                         }

@@ -36,7 +36,7 @@ namespace ISoft.Coder.Forms
             var connectionSettings = Host.Configuration.ConnectionStrings.ConnectionStrings;
             if (connectionSettings.Count == 0)
             {
-                cb_Connections.Items.Add("—— Please add connection string in t.config --");
+                cb_Connections.Items.Add("-- Please add connection string in t.config --");
             }
             else
             {
@@ -143,7 +143,11 @@ namespace ISoft.Coder.Forms
                     if (cb_Operations.SelectedIndex > 0)
                     {
                         Visible = false;
-                        wrapper.Do(cb_Operations.SelectedIndex - 1);
+                        wrapper.Do(cb_Operations.SelectedIndex - 1, msg =>
+                        {
+                            l_Console.Items.Add(msg);
+                            return true;
+                        });
                     }
                     else
                     {
