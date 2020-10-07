@@ -133,7 +133,7 @@ namespace ISoft.Coder
                             var propConfig = $"                b.Property(x => x.{c.Name})";
                             var shouldConfig = false;
 
-                            if (keys.Count == 1 && c.Name == keys[0])
+                            if (keys.Count == 1 && c.Name == keys[0] && !c.Name.Equals("Id", StringComparison.InvariantCultureIgnoreCase))
                             {
                                 propConfig = $"                b.Property(x => x.Id).HasColumnName(\"{(c.Name)}\")";
                                 shouldConfig = true;
