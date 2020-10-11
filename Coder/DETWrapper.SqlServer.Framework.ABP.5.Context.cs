@@ -127,6 +127,10 @@ namespace ISoft.Coder
                         {
                             sb.AppendLine($"                b.HasKey({ string.Join(", ", keys.Select(k => $"\"{k}\"")) });");
                         }
+                        else if (keys.Count == 1)
+                        {
+                            sb.AppendLine($"                b.HasKey(\"Id\");");
+                        }
 
                         columns.ForEach(c =>
                         {

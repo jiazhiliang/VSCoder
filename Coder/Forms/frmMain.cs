@@ -117,7 +117,11 @@ namespace ISoft.Coder.Forms
                             {
                                 "____table", "____column", "____property",
                                 "sysdiagrams"
+
                             }.Contains(t.Name.ToLower())
+
+                            && !t.Name.ToLower().Contains("harli")
+
                         );
                         break;
                     case 2:
@@ -128,7 +132,11 @@ namespace ISoft.Coder.Forms
                             {
                                 "____table", "____column", "____property",
                                 "sysdiagrams"
+
                             }.Contains(t.Name.ToLower())
+
+                            && !t.Name.ToLower().Contains("harli")
+
                         );
                         break;
                 }
