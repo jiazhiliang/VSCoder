@@ -123,7 +123,7 @@ namespace ISoft.Coder
                         sb.AppendLine($"                b.ToTable(\"{t.Name}\", AbpCommonDbProperties.DbSchema);");
                         sb.AppendLine("                 b.ConfigureByConvention();");
 
-                        if (keys.Count > 1 || keys[0] != "Id")
+                        if (keys.Count > 1)
                         {
                             sb.AppendLine($"                b.HasKey({ string.Join(", ", keys.Select(k => $"\"{k}\"")) });");
                         }
@@ -133,10 +133,15 @@ namespace ISoft.Coder
                             var propConfig = $"                b.Property(x => x.{c.Name})";
                             var shouldConfig = false;
 
-                            if (keys.Count == 1 && c.Name == keys[0] && !c.Name.Equals("Id", StringComparison.InvariantCultureIgnoreCase))
+                            if (keys.Count == 1 && c.Name == keys[0])
                             {
-                                propConfig = $"                b.Property(x => x.Id).HasColumnName(\"{(c.Name)}\")";
-                                shouldConfig = true;
+                                propConfig = $"                b.Property(x => x.Id)";
+
+                                if (!c.Name.Equals("Id", StringComparison.InvariantCultureIgnoreCase))
+                                {
+                                    propConfig = $"                b.Property(x => x.Id).HasColumnName(\"{(c.Name)}\")";
+                                    shouldConfig = true;
+                                }
                             }
 
                             if (!c.Nullable)
@@ -145,7 +150,7 @@ namespace ISoft.Coder
                                 shouldConfig = true;
                             }
 
-                            if (c.CharMaxLength.HasValue)
+                            if (c.CharMaxLength.HasValue && c.CharMaxLength > 0)
                             {
                                 propConfig += $".HasMaxLength({c.CharMaxLength})";
                                 shouldConfig = true;
