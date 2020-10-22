@@ -18,9 +18,20 @@ namespace ISoft.Coder
                 return;
             }
 
-            var template = GetTemplatePath("ABP.Entity");
+            if (!_Namespace.Contains(":"))
+            {
+                MessageBox.Show("Please provide a namespace:objectPrefix");
+                return;
+            }
+
+            var parts = _Namespace.SplitEx(':');
+            var template = GetTemplatePath("ABP.Context");
             var now = DateTime.Now;
             var projects = (Array)_App.ActiveSolutionProjects;
+
+            var boPrefix = parts[1];
+            var nameSpace = parts[0];
+
 
             // 准备插入代码
             ProjectItem file = null;
@@ -29,13 +40,13 @@ namespace ISoft.Coder
             StringBuilder sb = null;
 
             var batchIndex = -1;
-            var batchSize = 100;
+            var batchSize = 10000;
             var saved = true;
 
             Action<ProjectItem> _newFile = f =>
             {
                 batchIndex++;
-                file = f.ProjectItems.AddFromTemplate(template, $"BO.{batchIndex.ToString("D4")}.cs");
+                file = f.ProjectItems.AddFromTemplate(template, $"{boPrefix}.ALL.cs");
                 win = file.Open(Constants.vsViewKindCode);
                 sb = new StringBuilder();
 
@@ -48,7 +59,7 @@ namespace ISoft.Coder
                 sb.AppendLine(@"/// </summary>");
 
                 // 插入 namespace 行
-                sb.AppendLine("namespace " + _Namespace);
+                sb.AppendLine("namespace " + nameSpace);
                 sb.AppendLine("{");
 
                 saved = false;
@@ -163,10 +174,10 @@ namespace ISoft.Coder
                         }
 
                         // 表格名字
-                        sb.AppendLine($"public partial class BO_{t.Name}:{baseType}{{");
+                        sb.AppendLine($"public partial class {boPrefix}_{t.Name}:{baseType}{{");
 
                         // public constructor
-                        sb.AppendLine($"public BO_{t.Name}(){{}}");
+                        sb.AppendLine($"public {boPrefix}_{t.Name}(){{}}");
 
                         if (isCompoundKey)
                         {

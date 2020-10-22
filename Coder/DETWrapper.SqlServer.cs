@@ -10,6 +10,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
+using System.Text;
 using System.Windows.Forms;
 namespace ISoft.Coder
 {
@@ -296,6 +297,7 @@ namespace ISoft.Coder
                     ProjectItem file = null;
                     Window win = null;
                     TextSelection ts = null;
+                    StringBuilder sb = null;
 
                     var index = 0;
                     var count = -1;
@@ -308,7 +310,7 @@ namespace ISoft.Coder
                         {
                             // 创建新文件，并且在最后方插入
                             file = folder.ProjectItems.AddFromTemplate(
-                                DefaultTemplateFile, string.Format("{0}.{1}.cs", _Identifier, index.ToString("D2")));
+                                DefaultTemplateFile, string.Format("{0}.{1}.cs", _Identifier, "ALL"));
                             win = file.Open(Constants.vsViewKindCode);
                             win.Activate();
                             win.Document.Activate();
@@ -317,21 +319,16 @@ namespace ISoft.Coder
                             ts.EndOfDocument();
                             _BatchIndex = index;
 
+                            sb = new StringBuilder();
+
                             // 插入生成日期
-                            ts.Insert(@"/// <summary>");
-                            ts.NewLine();
-                            ts.Insert(string.Format(@"{0}", now.ToString()));
-                            ts.NewLine();
-                            ts.Insert(@"</summary>");
-                            ts.NewLine();
-                            ts.SelectLine();
-                            ts.Insert(" ");
+                            sb.AppendLine(@"/// <summary>");
+                            sb.AppendLine(string.Format(@"/// {0}", now.ToString()));
+                            sb.AppendLine(@"/// </summary>");
 
                             // 插入 namespace 行
-                            ts.Insert("namespace " + _Namespace);
-                            ts.NewLine();
-                            ts.Insert("{");
-                            ts.NewLine();
+                            sb.AppendLine("namespace " + _Namespace);
+                            sb.AppendLine("{");
                         }
 
                         MBTable t = tables[i];
@@ -351,14 +348,9 @@ namespace ISoft.Coder
                         {
                             if (!string.IsNullOrEmpty(t.Caption))
                             {
-                                ts.Insert(@"/// <summary>");
-                                ts.NewLine();
-                                ts.Insert(string.Format(@"{0}", t.Caption.ToStringEx()));
-                                ts.NewLine();
-                                ts.Insert(@"</summary>");
-                                ts.NewLine();
-                                ts.SelectLine();
-                                ts.Insert(" ");
+                                sb.AppendLine(@"/// <summary>");
+                                sb.AppendLine(string.Format(@"/// {0}", t.Caption.ToStringEx()));
+                                sb.AppendLine(@"/// </summary>");
                             }
                         }
                         else
@@ -367,40 +359,26 @@ namespace ISoft.Coder
                                 d.Field == string.Empty && d.Name == FIELD_SUMMARY &&
                                 !string.IsNullOrEmpty(d.Value)).IfNN(d =>
                                 {
-                                    ts.Insert(@"/// <summary>");
-                                    ts.NewLine();
-                                    ts.Insert(string.Format(@"{0}", d.Value));
-                                    ts.NewLine();
-                                    ts.Insert(@"</summary>");
-                                    ts.NewLine();
-                                    ts.SelectLine();
-                                    ts.Insert(" ");
+                                    sb.AppendLine(@"/// <summary>");
+                                    sb.AppendLine(string.Format(@"/// {0}", d.Value));
+                                    sb.AppendLine(@"/// </summary>");
                                 });
                         }
 
                         // 表格名字
-                        ts.Insert("[Serializable]");
-                        ts.NewLine();
-                        ts.Insert(string.Format("[Table(\"{0}\")]", t.Name));
-                        ts.NewLine();
-                        ts.Insert(string.Format("public partial class TB_{0}:TBObject<TB_{0}>{{", t.Name));
-                        ts.NewLine();
-                        //ts.Insert(string.Format("public partial class ET_{0} {{", t.Name));
-                        //ts.NewLine();
+                        sb.AppendLine("[Serializable]");
+                        sb.AppendLine(string.Format("[Table(\"{0}\")]", t.Name));
+                        sb.AppendLine(string.Format("public partial class TB_{0}:TBObject<TB_{0}>{{", t.Name));
+                        //sb.AppendLine(string.Format("public partial class ET_{0} {{", t.Name));
                         columns.ForEach(c =>
                         {
                             if (_Context.IsMySql)
                             {
                                 if (!string.IsNullOrEmpty(c.Caption))
                                 {
-                                    ts.Insert(@"/// <summary>");
-                                    ts.NewLine();
-                                    ts.Insert(string.Format(@"{0}", c.Caption));
-                                    ts.NewLine();
-                                    ts.Insert(@"</summary>");
-                                    ts.NewLine();
-                                    ts.SelectLine();
-                                    ts.Insert(" ");
+                                    sb.AppendLine(@"/// <summary>");
+                                    sb.AppendLine(string.Format(@"/// {0}", c.Caption));
+                                    sb.AppendLine(@"/// </summary>");
                                 }
                             }
                             else
@@ -411,14 +389,9 @@ namespace ISoft.Coder
                                     d.Field == c.Name && d.Name == FIELD_SUMMARY &&
                                     !string.IsNullOrEmpty(d.Value)).IfNN(d =>
                                     {
-                                        ts.Insert(@"/// <summary>");
-                                        ts.NewLine();
-                                        ts.Insert(string.Format(@"{0}", d.Value));
-                                        ts.NewLine();
-                                        ts.Insert(@"</summary>");
-                                        ts.NewLine();
-                                        ts.SelectLine();
-                                        ts.Insert(" ");
+                                        sb.AppendLine(@"/// <summary>");
+                                        sb.AppendLine(string.Format(@"/// {0}", d.Value));
+                                        sb.AppendLine(@"/// </summary>");
                                     });
                             }
 
@@ -427,20 +400,17 @@ namespace ISoft.Coder
                                 //var singleKey = !t.KeyInfo.ToStringEx(string.Empty).Contains(",");
                                 //if (singleKey && c.Type.Contains("int"))
                                 //{
-                                //    ts.Insert(@"[Key*]"); // 人为编译不成功，mySql 的问题
+                                //    sb.AppendLine(@"[Key*]"); // 人为编译不成功，mySql 的问题
                                 //}
                                 //else
                                 //{
-                                //    ts.Insert(@"[Key]");
+                                //    sb.AppendLine(@"[Key]");
                                 //}
 
-                                ts.Insert(@"[Key]");
-                                ts.NewLine();
-
+                                sb.AppendLine(@"[Key]");
                             }
 
-                            ts.Insert(string.Format(@"[Column(Order = {0})]", c.Ordinal));
-                            ts.NewLine();
+                            sb.AppendLine(string.Format(@"[Column(Order = {0})]", c.Ordinal));
 
                             if (c.CharMaxLength.HasValue &&
                                     !c.Type.Contains("blob") &&
@@ -449,8 +419,7 @@ namespace ISoft.Coder
                                     //!c.Spec.Contains("char(36)") // guid
                                     )
                             {
-                                ts.Insert(string.Format(@"[MaxLength({0})]", c.CharMaxLength));
-                                ts.NewLine();
+                                sb.AppendLine(string.Format(@"[MaxLength({0})]", c.CharMaxLength));
                             }
 
                             var s = "public ";
@@ -458,12 +427,10 @@ namespace ISoft.Coder
                             s += c.Name;
                             s += " { get; set; }";
 
-                            ts.Insert(s);
-                            ts.NewLine();
+                            sb.AppendLine(s);
                         });
 
-                        ts.Insert("}");
-                        ts.NewLine();
+                        sb.AppendLine("}");
 
                         if (doneToConfirmContinue != null)
                         {
@@ -472,9 +439,11 @@ namespace ISoft.Coder
 
                         if (count == _BatchSize - 1)
                         {
-                            ts.Insert("}");
-                            ts.NewLine();
+                            sb.AppendLine("}");
+
+                            ts.Insert(sb.ToString());
                             ts.SelectAll();
+
                             _App.ExecuteCommand("Edit.FormatDocument");
                             win.Close(vsSaveChanges.vsSaveChangesYes);
                             count = -1;
@@ -484,9 +453,11 @@ namespace ISoft.Coder
                     // closing
                     if (count != -1)
                     {
-                        ts.Insert("}");
-                        ts.NewLine();
+                        sb.AppendLine("}");
+
+                        ts.Insert(sb.ToString());
                         ts.SelectAll();
+
                         _App.ExecuteCommand("Edit.FormatDocument");
                         win.Close(vsSaveChanges.vsSaveChangesYes);
                         count = -1;
@@ -501,7 +472,7 @@ namespace ISoft.Coder
             int batchSize = 50)
             : this(app, ns, tableFilter)
         {
-            _BatchSize = batchSize;
+            _BatchSize = 10000;
             _Context = context;
         }
         public SqlServerClassGenWrapper(

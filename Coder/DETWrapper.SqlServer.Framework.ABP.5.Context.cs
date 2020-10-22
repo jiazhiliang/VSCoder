@@ -14,13 +14,13 @@ namespace ISoft.Coder
         {
             if (string.IsNullOrEmpty(_Namespace))
             {
-                MessageBox.Show("Please provide a namespace:extensionClassName");
+                MessageBox.Show("Please provide a namespace:extensionClassName:objectPrefix");
                 return;
             }
 
             if (!_Namespace.Contains(":"))
             {
-                MessageBox.Show("Please provide a namespace:extensionClassName");
+                MessageBox.Show("Please provide a namespace:extensionClassName:objectPrefix");
                 return;
             }
 
@@ -28,6 +28,8 @@ namespace ISoft.Coder
             var template = GetTemplatePath("ABP.Context");
             var now = DateTime.Now;
             var projects = (Array)_App.ActiveSolutionProjects;
+
+            var boPrefix = parts[2];
 
             // 准备插入代码
             ProjectItem file = null;
@@ -118,7 +120,7 @@ namespace ISoft.Coder
                             .Where(d => d.TableId == t.TableId).ToList();
 
 
-                        sb.AppendLine($"            builder.Entity<BO_{t.Name}>(b =>");
+                        sb.AppendLine($"            builder.Entity<{boPrefix}_{t.Name}>(b =>");
                         sb.AppendLine("             {");
                         sb.AppendLine($"                b.ToTable(\"{t.Name}\", AbpCommonDbProperties.DbSchema);");
                         sb.AppendLine("                 b.ConfigureByConvention();");
