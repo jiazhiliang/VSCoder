@@ -93,6 +93,8 @@ namespace ISoft.Coder.Forms
             {
                 // MessageBox.Show(Assembly.GetExecutingAssembly().Location);
 
+                var excludedList = Host.Configuration.AppSettings.Settings["ExcludedPrefices"].Value.Split(',');
+
                 BaseDTEWrapper wrapper = null;
                 DbConnection connection = null;
                 var connectionSection = Host.Configuration
@@ -120,7 +122,7 @@ namespace ISoft.Coder.Forms
 
                             }.Contains(t.Name.ToLower())
 
-                            && !t.Name.ToLower().Contains("harli")
+                            && !excludedList.Any(ee => t.Name.ToLower().StartsWith(ee))
 
                         );
                         break;
@@ -135,7 +137,7 @@ namespace ISoft.Coder.Forms
 
                             }.Contains(t.Name.ToLower())
 
-                            && !t.Name.ToLower().Contains("harli")
+                            && !excludedList.Any(ee => t.Name.ToLower().StartsWith(ee))
 
                         );
                         break;

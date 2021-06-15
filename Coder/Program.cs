@@ -26,7 +26,7 @@ namespace ISoft.Coder
             get
             {
                 var map = new CF.ExeConfigurationFileMap();
-                map.ExeConfigFilename = @"d:\templates\t.config";
+                map.ExeConfigFilename = @"c:\templates\t.config";
                 _Configuration = CF.ConfigurationManager.OpenMappedExeConfiguration(map, CF.ConfigurationUserLevel.None);
                 return _Configuration;
             }
