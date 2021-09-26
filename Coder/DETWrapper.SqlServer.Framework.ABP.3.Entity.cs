@@ -174,10 +174,10 @@ namespace ISoft.Coder
                         }
 
                         // 表格名字
-                        sb.AppendLine($"public partial class {boPrefix}_{t.Name}:{baseType}{{");
+                        sb.AppendLine($"public partial class {t.Name}:{baseType}{{");
 
                         // public constructor
-                        sb.AppendLine($"public {boPrefix}_{t.Name}(){{}}");
+                        sb.AppendLine($"protected {t.Name}(){{}}");
 
                         if (isCompoundKey)
                         {
@@ -209,7 +209,7 @@ namespace ISoft.Coder
                             var s = "public ";
                             s += _getType(c) + " ";
                             s += c.Name;
-                            s += " { get; set; }";
+                            s += " { get; protected set; }";
 
                             sb.AppendLine(s);
                         });

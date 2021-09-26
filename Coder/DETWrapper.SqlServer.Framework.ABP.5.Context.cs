@@ -120,18 +120,18 @@ namespace ISoft.Coder
                             .Where(d => d.TableId == t.TableId).ToList();
 
 
-                        sb.AppendLine($"            builder.Entity<{boPrefix}_{t.Name}>(b =>");
+                        sb.AppendLine($"            builder.Entity<{t.Name}>(b =>");
                         sb.AppendLine("             {");
                         sb.AppendLine($"                b.ToTable(\"{t.Name}\", AbpCommonDbProperties.DbSchema);");
                         sb.AppendLine("                 b.ConfigureByConvention();");
 
                         if (keys.Count > 1)
                         {
-                            sb.AppendLine($"                b.HasKey({ string.Join(", ", keys.Select(k => $"\"{k}\"")) });");
+                            sb.AppendLine($"                b.HasKey(x => new {{ { string.Join(", ", keys.Select(k => $"x.{k}")) } }});");
                         }
                         else if (keys.Count == 1)
                         {
-                            sb.AppendLine($"                b.HasKey(\"Id\");");
+                            sb.AppendLine($"                b.HasKey(x => x.Id);");
                         }
 
                         columns.ForEach(c =>

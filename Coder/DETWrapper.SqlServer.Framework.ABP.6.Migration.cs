@@ -55,12 +55,18 @@ namespace ISoft.Coder
                     return "DateTime()";
                 case _Types.t_money:
                 case _Types.t_smallmoney:
-                    return "Decimal()";
+                    return "Currency()";
                 case _Types.t_uniqueidentifier:
                     return "Guid()";
                 case _Types.t_char:
                     return "String()";
                 case _Types.t_varchar:
+                case _Types.t_nvarchar:
+                    if (c.CharMaxLength.HasValue && c.CharMaxLength > 0 && c.CharMaxLength.Value < 5000)
+                    {
+                        return $"String({c.CharMaxLength})";
+                    }
+                    return "String()";
                 case _Types.t_tinytext:
                 case _Types.t_text:
                 case _Types.t_mediumtext:
@@ -68,7 +74,6 @@ namespace ISoft.Coder
                 case _Types.t_set:
                 case _Types.t_enum:
                 case _Types.t_nchar:
-                case _Types.t_nvarchar:
                 case _Types.t_ntext:
                 case _Types.t_xml:
                     return "String()";
@@ -195,13 +200,17 @@ namespace ISoft.Coder
                         var properties = _Context.Properties
                             .Where(d => d.TableId == t.TableId).ToList();
 
-                        sb.AppendLine($"            var b{t.Name} = Create.Table(\"{t.Name}\")");
+                        sb.AppendLine($"            Create.Table(\"{t.Name}\")");
 
                         columns.ForEach(c =>
                         {
-                            sb.Append($"            .WithColumn(\"{c.Name}\").As{_getMigratingType(c)}");
+                            sb.Append($"                .WithColumn(\"{c.Name}\").As{_getMigratingType(c)}");
 
-                            if (!c.Nullable)
+                            if (c.Nullable)
+                            {
+                                sb.Append(".Nullable()");
+                            }
+                            else
                             {
                                 sb.Append(".NotNullable()");
                             }
@@ -210,6 +219,9 @@ namespace ISoft.Coder
                             {
                                 sb.Append(".PrimaryKey()");
                             }
+
+                            sb.AppendLine();
+
                         });
 
                         sb.AppendLine(";");
