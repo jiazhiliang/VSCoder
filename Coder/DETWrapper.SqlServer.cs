@@ -110,6 +110,9 @@ namespace ISoft.Coder
                 case 5:
                     _Do_5(doneToConfirmContinue);
                     break;
+                case 6:
+                    _Do_6(doneToConfirmContinue);
+                    break;
             }
         }
 
@@ -490,6 +493,7 @@ namespace ISoft.Coder
             _Operations.Add("ABP: generate DTO");
             _Operations.Add("ABP: generate EF table spec");
             _Operations.Add("ABP: generate migration");
+            _Operations.Add("ABP: generate airtable");
         }
 
     }
