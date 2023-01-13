@@ -113,6 +113,9 @@ namespace ISoft.Coder
                 case 6:
                     _Do_6(doneToConfirmContinue);
                     break;
+                case 7:
+                    _Do_7(doneToConfirmContinue);
+                    break;
             }
         }
 
@@ -494,6 +497,7 @@ namespace ISoft.Coder
             _Operations.Add("ABP: generate EF table spec");
             _Operations.Add("ABP: generate migration");
             _Operations.Add("ABP: generate airtable");
+            _Operations.Add("EFCore: generate table as entity class");
         }
 
     }

@@ -120,6 +120,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="DETWrapper.MySql.cs" />
+    <Compile Include="DETWrapper.SqlServer.EFCore.cs" />
     <Compile Include="DETWrapper.SqlServer.Framework.ABP.7.AirTable.cs" />
     <Compile Include="DETWrapper.SqlServer.Framework.ABP.6.Migration.cs" />
     <Compile Include="DETWrapper.SqlServer.Framework.ABP.5.Context.cs" />
