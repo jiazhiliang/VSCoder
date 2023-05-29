@@ -112,6 +112,12 @@ namespace ISoft.Coder
                         // 表格名字
                         sb.AppendLine("[Serializable]");
                         sb.AppendLine(string.Format("[Table(\"{0}\")]", t.Name));
+
+                        if (!string.IsNullOrWhiteSpace(t.KeyInfo) && t.KeyInfo.Contains(','))
+                        {
+                            sb.AppendLine($"[PrimaryKey({t.KeyInfo.Split(',').Select(x => $"nameof({x})").ToList().ToFlat()})]");
+                        }
+
                         sb.AppendLine(string.Format("public partial class TB_{0}{{", t.Name));
                         columns.ForEach(c =>
                         {
